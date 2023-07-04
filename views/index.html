@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <title>Instagram Giveaway Bot Panel</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-toaster@5.2.0-beta1.1/dist/css/bootstrap-toaster.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="area">
+
+
+        <div class="container py-5">
+            <h1 class="text-center mb-5">
+                <img src="TeslaTitle.png" alt="Tesla Logo" height="80"> Giveaway Bot Panel
+            </h1>
+
+            <!-- Start of Tabs -->
+            <ul class="nav nav-pills nav-fill mb-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="panel-tab" data-bs-toggle="tab" data-bs-target="#panel" type="button" role="tab" aria-controls="panel" aria-selected="true">Panel</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="proxies-tab" data-bs-toggle="tab" data-bs-target="#proxies" type="button" role="tab" aria-controls="proxies" aria-selected="false">Proxies</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Settings</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <!-- panel tab -->
+                <div class="tab-pane fade show active" id="panel" role="tabpanel" aria-labelledby="panel-tab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Comments Posted</h5>
+                                    <p class="card-text" id="commentsPosted">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Days Until End of Giveaway</h5>
+                                    <p class="card-text" id="daysUntilEnd">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title" id="timeSinceError_title">Time Since Last 429 Error</h5>
+                                    <p class="card-text" id="timeSinceError_body">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Giveaway End Date</h5>
+                                    <input type="date" class="form-control" data-setting="stopDate" id="endDate">
+                                </div>
+                            </div>
+
+                            <div class="card mb-2">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Controls</h5>
+                                    <button class="btn btn-success" id="startButton">Start</button>
+                                    <button class="btn btn-danger" id="stopButton">Stop</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Comment Delay</h5>
+                                    <div class="mb-3">
+                                        <label for="minDelay" class="form-label">Minimum Delay (Seconds)</label>
+                                        <input type="number" class="form-control" data-setting="commentMinSec" id="minDelay">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="maxDelay" class="form-label">Maximum Delay (Seconds)</label>
+                                        <input type="number" class="form-control" data-setting="commentMaxSec" id="maxDelay">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Logs <i class="fas fa-eraser" id="clearLogs" title="Clear Logs" style="cursor:pointer;"></i> </h5>
+                            <textarea id="logs" class="logs form-control" readonly></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Proxies Tab -->
+                <div class="tab-pane fade" id="proxies" role="tabpanel" aria-labelledby="proxies-tab">
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Available Proxies</h5>
+                                    <p class="card-text" id="totalProxies">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Proxies Checked in Last 30 Minutes</h5>
+                                    <p class="card-text" id="checkedProxies">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Proxies for Selected Countries</h5>
+                                    <p class="card-text" id="countryProxies">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row m-2">
+                        <div class="card mb-3">
+                            <div class="row m-2">
+                                <div class="col-md-3">
+                                    <label for="availableCountries">Available Countries:</label>
+                                    <select multiple class="form-control" id="availableCountries">
+
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="availableCities">Available Cities:</label>
+                                    <select multiple class="form-control" id="availableCities">
+                                    </select>
+                                </div>
+                                <div class="col-md-2 text-center my-auto">
+                                    <button class="btn btn-primary" id="addCountry"> >> </button>
+                                    <button class="btn btn-primary" id="removeCountry">
+                                        << </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="selectedProxies">Selected Cities</label>
+                                    <select multiple class="form-control" id="selectedProxies">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Setting tab -->
+                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Proxies</h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" data-setting="proxies_enabled" id="proxyToggle">
+                                        <label class="form-check-label" for="proxyToggle">
+                                            Enable Proxies
+                                        </label>
+
+                                        <input type="password" class="form-control mt-2" id="webshare_token" data-setting="webshare_token" placeholder="Enter webshare token here">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Media Post Link</h5>
+                                    <input type="text" class="form-control" id="mediaPostLink" data-setting="mediaLink" placeholder="Enter link here">
+
+                                    <div class="form-check mt-3">
+                                        <input class="form-check-input" type="checkbox" id="saveDataCheckbox" data-setting="saveData">
+                                        <label class="form-check-label" for="saveDataCheckbox">
+                                            Save Data (Block videos and images)
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Username and Password</h5>
+                                    <input type="text" class="form-control mb-2" id="username" data-setting="IG_USERNAME" placeholder="Username">
+                                    <input type="password" class="form-control" id="password" data-setting="IG_PASSWORD" placeholder="Password">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Pushover Notifications</h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" data-setting="pushover_notifications" id="pushover_notifications_toggle">
+                                        <label class="form-check-label" for="pushover_notifications_toggle">
+                                            Enable feature
+                                        </label>
+                                    </div>
+                                    <input type="password" class="form-control mb-2" id="pushoverUser" data-setting="pushoverUser" placeholder="User Key">
+                                    <input type="password" class="form-control" id="pushoverToken" data-setting="pushoverToken" placeholder="Application Token">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <!-- End of Tabs -->
+
+        </div>
+
+        <ul class="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-toaster@5.2.0-beta1.1/dist/umd/bootstrap-toaster.min.js"></script>
+    <script src="/script.js"></script>
+</body>
+
+</html>

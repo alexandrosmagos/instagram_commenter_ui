@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <title>Instagram Giveaway Bot Panel</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+    <div class="area">
+        
+
+        <div class="container py-5">
+            <h1 class="text-center mb-5">
+                <img src="TeslaTitle.png" alt="Tesla Logo" height="80"> Giveaway Bot Panel
+            </h1>
+
+            <!-- Start of Tabs -->
+            <ul class="nav nav-pills nav-fill mb-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="panel-tab" data-bs-toggle="tab" data-bs-target="#panel" type="button" role="tab" aria-controls="panel" aria-selected="true">Panel</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="proxies-tab" data-bs-toggle="tab" data-bs-target="#proxies" type="button" role="tab" aria-controls="proxies" aria-selected="false">Proxies</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="panel" role="tabpanel" aria-labelledby="panel-tab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Comments Posted</h5>
+                                    <p class="card-text" id="commentsPosted">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Days Until End of Giveaway</h5>
+                                    <p class="card-text" id="daysUntilEnd">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Time Since Last 429 Error</h5>
+                                    <p class="card-text" id="timeSince429">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Giveaway End Date</h5>
+                                    <input type="date" class="form-control" data-setting="stopDate" id="endDate">
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Controls</h5>
+                                    <button class="btn btn-success" id="startButton">Start</button>
+                                    <button class="btn btn-danger" id="stopButton">Stop</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Comment Delay</h5>
+                                    <div class="mb-3">
+                                        <label for="minDelay" class="form-label">Minimum Delay (Seconds)</label>
+                                        <input type="number" class="form-control" data-setting="commentMinSec" id="minDelay">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="maxDelay" class="form-label">Maximum Delay (Seconds)</label>
+                                        <input type="number" class="form-control" data-setting="commentMaxSec" id="maxDelay">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Logs</h5>
+                            <textarea id="logs" class="logs form-control" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="proxies" role="tabpanel" aria-labelledby="proxies-tab">
+                    <div class="form-group mt-4">
+                        <label for="availableCountries">Available Countries:</label>
+                        <select multiple class="form-control" id="availableCountries">
+                            <!-- Add a few country options here -->
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                        </select>
+                    </div>
+                    <div class="form-group mt-4">
+                        <label for="selectedCountries">Selected Countries:</label>
+                        <select multiple class="form-control" id="selectedCountries">
+                            <!-- Selected countries will be added here -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Tabs -->
+
+        </div>
+
+        <ul class="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const logsArea = document.getElementById('logs');
+        const commentsPosted = document.getElementById('commentsPosted');
+        const daysUntilEnd = document.getElementById('daysUntilEnd');
+        const endDatePicker = document.getElementById('endDate');
+        const minDelay = document.getElementById('minDelay');
+        const maxDelay = document.getElementById('maxDelay');
+        const timeSince429 = document.getElementById('timeSince429');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+
+
+        socket.on('log', (msg) => {
+            // Update the logs area with the new log
+            logsArea.value += msg + '\n';
+            logsArea.scrollTop = logsArea.scrollHeight;
+
+            if (msg.includes('] Commented \'')) {
+                commentsPosted.innerText = parseInt(commentsPosted.innerText) + 1;
+            }
+        });
+
+        socket.on('data', (msg) => {
+            logsArea.value = msg.lines + '\n';
+            logsArea.scrollTop = logsArea.scrollHeight;
+
+            commentsPosted.innerText = msg.settings.counter;
+
+            if (msg.settings.botRunning) {
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            } else {
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+
+
+            const stopDate = new Date(msg.settings.stopDate);
+            const today = new Date();
+            const timeDiff = stopDate.getTime() - today.getTime();
+            const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            daysUntilEnd.innerText = daysUntil;
+
+            endDatePicker.valueAsDate = stopDate;
+
+            minDelay.value = msg.settings.commentMinSec;
+            maxDelay.value = msg.settings.commentMaxSec;
+
+            console.log(`last429: ${msg.settings.last429} , and length is ${msg.settings.last429.length}`);
+            if (msg.settings.last429.length === 0) {
+                timeSince429.innerText = 'N/A';
+            } else {
+                const last429 = new Date(msg.settings.last429);
+                setInterval(() => {
+                    const today = new Date();
+                    const timeDiff = today.getTime() - last429.getTime();
+                    const minutesSince = Math.floor(timeDiff / 1000 / 60);
+                    const secondsSince = Math.floor(timeDiff / 1000) - (minutesSince * 60);
+                    timeSince429.innerText = `${minutesSince} minutes, and ${secondsSince} seconds.`;
+                }, 1000);
+            }
+
+        });
+
+        const inputs = document.querySelectorAll('input');
+
+        inputs.forEach(input => {
+            input.addEventListener('change', event => {
+                const setting = event.target.dataset.setting;
+                const value = event.target.value;
+
+                if (setting === 'stopDate') {
+                    const stopDate = new Date(value);
+                    const today = new Date();
+                    const timeDiff = stopDate.getTime() - today.getTime();
+                    const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    daysUntilEnd.innerText = daysUntil;
+                }
+
+                socket.emit('changeSetting', { setting, value });
+                console.log(`Setting ${setting} changed to ${value}`);
+            });
+        });
+
+        // Start btn
+        document.getElementById('startButton').addEventListener('click', () => {
+            socket.emit('start');
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        });
+
+        // Stop btn
+        document.getElementById('stopButton').addEventListener('click', () => {
+            socket.emit('stop');
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        });
+
+    </script>
+
+</body>
+
+</html>
