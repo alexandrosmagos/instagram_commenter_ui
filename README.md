@@ -43,6 +43,7 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#license">License</a></li>
@@ -59,21 +60,25 @@ This project aims to provide a simple and customizable bot to automate commentin
 
 Instagram Giveaway Commenter is a tool that automates the process of participating in Instagram giveaways. Here's an overview of its features:
 
-1. **Automated Commenting**: It automatically posts comments on giveaway posts on Instagram based on the user's settings.
+1. **One Page Design**: The application features a one-page design that provides a faster and prettier user interface, facilitating better user experience.
 
-2. **Time Management**: The tool manages comment timings and can delay the next comment based on user-defined minimum and maximum delay values. It avoids spam detection by checking if enough time has passed since the last comment before proceeding with the next one.
+2. **User Authentication**: The tool supports user registration and authentication. This feature makes it feasible for users to host this application on a Windows, Mac, or Linux system and forward it or set it up on a private domain. This allows for easier access, management, and monitoring.
 
-3. **Proxy Management**: It allows the use of proxies. The user can enable or disable the proxy usage. In case the proxy is enabled, the tool provides an option to select the desired country and city from a list of available options. **Not Yet Finished**
+3. **Automated Commenting**: It automatically posts comments on giveaway posts on Instagram based on the user's settings.
 
-4. **Error Management**: The tool handles errors such as Instagram's 429 error (too many requests) gracefully, by implementing delays and resuming operation when feasible. It also displays the time elapsed since the last 429 error.
+4. **Time Management**: The tool manages comment timings and can delay the next comment based on user-defined minimum and maximum delay values. It avoids spam detection by checking if enough time has passed since the last comment before proceeding with the next one.
 
-5. **Activity Logs**: The tool maintains logs of its operation which the user can view and clear as needed.
+5. **Proxy Management**: It allows the use of proxies. The user can enable or disable the proxy usage. In case the proxy is enabled, the tool provides an option to select the desired country and city from a list of available options. **Not Yet Finished**
 
-6. **Customization**: The tool allows the user to customize various settings such as Instagram username and password, media link for the giveaway post, stop date for commenting, and pushover notification preferences.
+6. **Error Management**: The tool handles errors such as Instagram's 429 error (too many requests) gracefully, by implementing delays and resuming operation when feasible. It also displays the time elapsed since the last 429 error.
 
-7. **Pushover Notifications**: The tool supports sending notifications to the user's device via Pushover, if the user has enabled this option and provided their Pushover user key and application token.
+7. **Activity Logs**: The tool maintains logs of its operation which the user can view and clear as needed.
 
-Remember that this tool is intended for responsible use. Do not use it to spam or violate Instagram's community guidelines.
+8. **Customization**: The tool allows the user to customize various settings such as Instagram username and password, media link for the giveaway post, stop date for commenting, and pushover notification preferences.
+
+9. **Pushover Notifications**: The tool supports sending notifications to the user's device via Pushover, if the user has enabled this option and provided their Pushover user key and application token.
+
+Remember that this tool is intended for responsible use. Please be aware that using it in a way that violates Instagram's community guidelines or engages in spam-like activity goes against Instagram's Terms of Service (TOS). For more information, please refer to the Disclaimer & Acknowledgement section.
 
 ### Built With
 
@@ -118,6 +123,23 @@ After everything is set, press the "Start" button to start the bot. If there are
 ## Roadmap
 
 See the [open issues](https://github.com/alexandrosmagos/instagram_commenter_ui/issues) for a list of proposed features (and known issues).
+
+## Screenshots
+
+Here are some screenshots that show the main functionality of the Instagram Giveaway Commenter:
+
+### Main Panel Tab
+![Main Panel Tab](readme_images/panel.gif)
+Here is where you manage and monitor the bot's activity. It features live logs and counters, Start / Stop bot control, and more.
+
+### Settings Tab
+![Settings Tab](readme_images/settings.gif)
+You can adjust various parameters here, like Instagram credentials, the link to the Instagram post you want to comment on, and more.
+
+### Proxies Tab
+![Proxies Tab](readme_images/proxies.gif)
+Manage your proxies. You can add, update, and delete proxies. You can also validate the proxy settings here.
+
 
 ## Contributing
 
