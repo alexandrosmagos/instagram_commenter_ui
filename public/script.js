@@ -33,6 +33,9 @@ function initializeDOMElements() {
 		pushover_notifications_toggle: document.getElementById("pushover_notifications_toggle"),
 		pushover_userKey: document.getElementById("pushoverUser"),
 		pushover_appkey: document.getElementById("pushoverToken"),
+		usernames: document.getElementById("usernames"),
+		runningOn: document.getElementById("runningOn"),
+		chromium_headless: document.getElementById("chromium_headless"),
 	};
 }
 
@@ -76,7 +79,6 @@ function setSocketEvents() {
 
 		if (msg.env.webshare_token.length > 0) webshare_token_input.value = msg.env.webshare_token;
 
-		// if proxyToggle is checked, remove disabled class from proxy tab, else add it
 		proxyToggle.addEventListener("change", () => {
 			if (proxyToggle.checked) {
 				webshare_token_input.disabled = false;
@@ -97,19 +99,21 @@ function setSocketEvents() {
 			document.getElementById("proxies-tab").classList.remove("disabled");
 		}
 
+        if (msg.proxies) {
+            if (msg.proxies.totalProxies) totalProxies.innerText = msg.proxies.totalProxies;
 
-		if (msg.proxies.totalProxies) totalProxies.innerText = msg.proxies.totalProxies;
+            if (msg.proxies.countries.length > 0) {
+                availableCountries.innerHTML = "";
 
-		if (msg.proxies.countries.length > 0) {
-			availableCountries.innerHTML = "";
+                msg.proxies.countries.forEach((country) => {
+                    const option = document.createElement("option");
+                    option.value = country.country_code;
+                    option.innerText = country.country_code;
+                    availableCountries.appendChild(option);
+                });
+            }
+        }
 
-			msg.proxies.countries.forEach((country) => {
-				const option = document.createElement("option");
-				option.value = country.country_code;
-				option.innerText = country.country_code;
-				availableCountries.appendChild(option);
-			});
-		}
 
 		if (msg.settings.pushover_notifications) {
 			pushover_notifications_toggle.checked = true;
@@ -143,7 +147,16 @@ function setSocketEvents() {
 			stopButton.disabled = true;
 		}
 
+		if (msg.settings.chromium_headless.length > 0) chromium_headless.value = msg.settings.chromium_headless;
+		if (msg.settings.runningOn.length > 0) {
+			runningOn.value = msg.settings.runningOn;
+			if (msg.settings.runningOn === "Linux") chromium_headless.disabled = true;
+		}
+
+
 		mediaPostLink.value = msg.settings.mediaLink;
+
+        usernames.value = msg.settings.usernames;
 
 		const stopDate = new Date(msg.settings.stopDate);
 		const today = new Date();
@@ -180,11 +193,18 @@ function setSocketEvents() {
 }
 
 function setInputEventListeners() {
-	const inputs = document.querySelectorAll("input");
+	const inputs = document.querySelectorAll("input, select");
 	inputs.forEach((input) => {
 		input.addEventListener("change", (event) => {
 			const setting = event.target.dataset.setting;
 			let value = event.target.value;
+
+			if (setting === "runningOn" && value === "Linux") {
+				chromium_headless.value = "Hidden";
+				chromium_headless.disabled = true;
+			} else if (setting === "runningOn" && value !== "Linux") {
+				chromium_headless.disabled = false;
+			}
 
 			if (event.target.type === "checkbox") {
 				value = event.target.checked;

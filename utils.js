@@ -14,20 +14,47 @@ const logs_location = "./settings/logs.txt";
 let browser, page, io;
 let is429 = false, isDelaying = false, errorOccurred = false;
 
-// Checking for initial setup
-init_settings();
-
 // Module Exports
 module.exports = function (socketIO) {
+	init_settings();
     io = socketIO;
     io.on("connection", handleSocketConnection);
 };
+
+async function checkMinSettings() {
+	if (!process.env.IG_USERNAME || !process.env.IG_PASSWORD) {
+		log("Username or password not set. Go to the settings tab, and enter your login details.");
+		return false;
+	}
+
+	if (!settings.commentMinSec || !settings.commentMaxSec) {
+		log("Comment delay not set. Go to the main panel tab, and enter the comment delays.");
+		return false;
+	}
+
+	if (!settings.usernames || settings.usernames.split(" ").length < 3) {
+		log("Not enough usernames to comment. Go to the settings tab, and enter at least 3 usernames to comment with.");
+		return false;
+	}
+
+	if (!settings.mediaLink) {
+		log("Media link not set. Go to the main panel tab, and enter the media link.");
+		return false;
+	}
+
+	return true;
+}
 
 
 async function startBot() {
 	settings.botRunning = true;
 	updateSetting("botRunning", settings.botRunning);
+
 	log(`Bot has started at ${new Date().toLocaleTimeString()}`);
+
+	// check min settings
+	const minSettings = await checkMinSettings();
+	if (!minSettings) return stopBot();
 
 	const spamPauseUntil = settings.spamPauseUntil || 0;
 	if (Date.now() < spamPauseUntil) {
@@ -50,7 +77,10 @@ async function startBot() {
 
             // if not logged in, log in
             if (loginCheck.length > 0) {
+                console.log(`[${new Date().toLocaleTimeString()}] 111`);
                 await login();
+                log(`[${new Date().toLocaleTimeString()}] Navigating to post`);
+                await page.goto(settings.mediaLink, { waitUntil: "networkidle2" });
             }
         } catch (error) {
             // console.log(`[${new Date().toLocaleTimeString()}] User is still logged in`);
@@ -87,9 +117,22 @@ function stopBot() {
 }
 
 async function init_browser() {
-	browser = await puppeteer.launch({ headless: "new", executablePath: "/usr/bin/chromium-browser" }); //hidden
-	// browser = await puppeteer.launch({ headless: false, executablePath: "/usr/bin/chromium-browser" }); //shown
-	page = await browser.newPage();
+	const isHeadless = settings.chromium_headless === "Hidden" ? "new" : false;
+    const isLinux = settings.runningOn === "Linux";
+
+    try {
+        browser = await puppeteer.launch({
+            headless: isLinux ? "new" : isHeadless,
+            executablePath: isLinux ? "/usr/bin/chromium-browser" : undefined,
+        });
+
+        page = await browser.newPage();
+    } catch (error) {
+        console.error(`Failed to launch the browser. Error: ${error}`);
+        log("Browser could not be started. Please make sure you have selected the correct platform in the settings.");
+        
+        return stopBot();
+    }
 
     await page.setExtraHTTPHeaders({
         'Accept-Language': 'en,el-GR;q=0.9,el;q=0.8'
@@ -195,116 +238,85 @@ async function init_browser() {
                 sendPushoverNotification(`${status}..`, `[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}`);
             }
 		}
+
 	});
 
-	if (fs.existsSync(cookie_location)) {
+    // if cookie_location file exists and is not empty
+	if (fs.existsSync(cookie_location) && fs.statSync(cookie_location).size !== 0) {
 		const cookies = JSON.parse(fs.readFileSync(cookie_location, "utf8"));
 		if (cookies.length !== 0) {
+            // Check if any cookies are expired
+            const hasExpired = await hasExpiredCookies();
+            if (hasExpired) {
+                console.log('Some cookies are expired, logging in again...');
+                await login();
+            }
+            
 			for (let cookie of cookies) {
 				await page.setCookie(cookie);
 			}
 			log(`[${new Date().toLocaleTimeString()}] Session has been loaded in the browser`);
 		} else {
-			await login();
+			log("Cookies file is empty, logging in...");
+			return await login();
 		}
-	} else {
-		// cookie consent
-		const cookies = [
-			{
-				name: "csrftoken",
-				value: "pbHyoTMf6T0vYSGOroBufhgEYDuuB3dh",
-				domain: ".instagram.com",
-				path: "/",
-				expires: 1719482829.245004,
-				httpOnly: false,
-				secure: true,
-				sameSite: "None",
-			},
-			{
-				name: "ig_did",
-				value: "9B911CBB-8EA9-469B-9E12-43B33519D1FB",
-				domain: ".instagram.com",
-				path: "/",
-				expires: 1722593229.245066,
-				httpOnly: true,
-				secure: true,
-				sameSite: "None",
-			},
-			{
-				name: "mid",
-				value: "ZJ1XzQALAAFuJQ4wn8MAXAtIps42",
-				domain: ".instagram.com",
-				path: "/",
-				expires: 1722593229.24505,
-				httpOnly: false,
-				secure: true,
-				sameSite: "None",
-			},
-		];
 
-		await page.setCookie(...cookies);
+	} else {
+		log("Cookies file does not exist, logging in...");
 		await login();
 	}
 
-	await page.goto(settings.mediaLink);
-}
-
-function init_settings() {
-    const default_settings = {
-        stopDate: "2023-09-01",
-        mediaLink: "",
-        lastCommented: "0",
-        commentMinSec: "350",
-        commentMaxSec: "900",
-        last429: "",
-        spamPauseUntil: 0,
-        counter: 0,
-        botRunning: false,
-        saveData: true,
-        proxies_enabled: false,
-        pushover_notifications: false
-    };
-
-    if (!fs.existsSync(settings_location)) {
-        fs.writeFileSync(settings_location, JSON.stringify(default_settings, null, 2));
-        log("Default / Initial settings applied.");
-    } else {
-        const currentSettings = JSON.parse(fs.readFileSync(settings_location, "utf8"));
-        let hasMissingSettings = false;
-
-        for (const key in default_settings) {
-            if (!(key in currentSettings)) {
-                currentSettings[key] = default_settings[key];
-                hasMissingSettings = true;
-            }
-        }
-
-        if (hasMissingSettings) {
-            fs.writeFileSync(settings_location, JSON.stringify(currentSettings, null, 2));
-            log("Missing default settings added.");
-        }
+    // if url is not settings.mediaLink, navigate
+    if (page.url() !== settings.mediaLink) {
+        log(`[${new Date().toLocaleTimeString()}] Navigating to ${settings.mediaLink}`);
+        await page.goto(settings.mediaLink);
     }
 }
 
 async function login() {
-	log(`[${new Date().toLocaleTimeString()}] User is not logged in. Redirecting to the login page...`);
+    log(`[${new Date().toLocaleTimeString()}] User is not logged in. Redirecting to the login page...`);
 
-	await page.goto("https://www.instagram.com/accounts/login/");
-	await page.waitForSelector('input[name="username"]');
-	await page.type('input[name="username"]', process.env.IG_USERNAME);
-	await page.type('input[name="password"]', process.env.IG_PASSWORD);
-	await page.click('button[type="submit"]');
+    await page.goto("https://www.instagram.com/accounts/login/");
 
-	await page.waitForSelector('textarea[aria-label="Add a comment…"]');
+    try {
+        await page.waitForTimeout(2000);
+        const declineCookiesButton = await page.$('button[tabindex="0"]');
+        if (declineCookiesButton) {
+            log("Declining optional cookies...")
+            await declineCookiesButton.click();
+        }
+    } catch (err) {
+        console.log("Optional cookies dialog did not appear");
+    }
 
-	const cookies = await page.cookies();
-	fs.writeFileSync(cookie_location, JSON.stringify(cookies, null, 2));
+    await page.waitForSelector('input[name="username"]');
+    await page.type('input[name="username"]', process.env.IG_USERNAME);
+    await page.type('input[name="password"]', process.env.IG_PASSWORD);
 
-	log(`[${new Date().toLocaleTimeString()}] User has been logged in`);
+    await page.waitForTimeout(500);
+    await page.keyboard.press("Enter");
+
+    try {
+        await page.waitForSelector('#slfErrorAlert', { timeout: 3000 });
+        log("Login failed: Incorrect username or password");
+		return stopBot();
+    } catch (err) {
+        
+    }
+
+    await page.waitForSelector('img[alt*="\'s profile picture"]');
+
+    const cookies = await page.cookies();
+    fs.writeFileSync(cookie_location, JSON.stringify(cookies, null, 2));
+
+    log(`[${new Date().toLocaleTimeString()}] User has been logged in. Navigating to ${settings.mediaLink}`);
+
+    await page.goto(settings.mediaLink);
 }
 
 async function commentOnPost() {
-	const users = ["@koutsoupias_dimitris", "@spyrosmillas", "@eva.kmt", "@periklis_gousios", "@pxatsos"];
+
+    const users = settings.usernames.split(" ").filter((x) => x !== ""); // splits usernames into array and removes empty strings
 
 	const randomUsers = users.sort(() => 0.5 - Math.random()).slice(0, 3);
 
@@ -313,6 +325,7 @@ async function commentOnPost() {
 	try {
 		await page.waitForSelector('textarea[aria-label="Add a comment…"]');
 	} catch (error) {
+        console.log("comment selector not found, logging in");
 		await login();
 		await page.waitForSelector('textarea[aria-label="Add a comment…"]');
 	}
@@ -333,8 +346,10 @@ async function commentOnPost() {
 async function handleSocketConnection(socket) {
     console.log("User connected");
 
+    let proxies;
     const lines = await getLast20Lines();
-    const proxies = await proxyModule.initData();
+    
+    if (settings.proxies_enabled) proxies = await proxyModule.initData();
 
     socket.emit("data", { 
         settings: settings, 
@@ -463,7 +478,7 @@ function updateSetting(setting, value) {
 }
 
 function updateEnv(setting, value) {
-	const envPath = path.join(__dirname, ".env");
+	const envPath = path.join(__dirname, "./settings/.env");
 	let envFile = fs.readFileSync(envPath, "utf8");
 	const lines = envFile.split("\n");
 
@@ -491,4 +506,62 @@ function log(message) {
 			console.error("Failed to write to logs.txt:", err);
 		}
 	});
+}
+
+async function hasExpiredCookies() {
+    const data = fs.readFileSync(cookie_location, 'utf8');
+    const cookies = JSON.parse(data);
+
+    return cookies.some(cookie => {
+        if (cookie.name === 'rur') return false;
+
+        const expiryDate = new Date(cookie.expires * 1000);
+        return !isNaN(expiryDate.getTime()) && expiryDate < new Date();
+    });
+}
+
+function init_settings() {
+    const default_settings = {
+        stopDate: "2023-09-01",
+        mediaLink: "",
+        lastCommented: "0",
+        commentMinSec: "350",
+        commentMaxSec: "900",
+        last429: "",
+        usernames: "",
+        spamPauseUntil: 0,
+        counter: 0,
+        botRunning: false,
+        saveData: true,
+        proxies_enabled: false,
+        pushover_notifications: false,
+		runningOn: "WindowsMac",
+		chromium_headless: "Hidden"
+    };
+
+    if (!fs.existsSync(settings_location)) {
+        fs.writeFileSync(settings_location, JSON.stringify(default_settings, null, 2));
+        // log("Default / Initial settings applied.");
+    } else {
+        const currentSettings = JSON.parse(fs.readFileSync(settings_location, "utf8"));
+        let hasMissingSettings = false;
+
+        for (const key in default_settings) {
+            if (!(key in currentSettings)) {
+                currentSettings[key] = default_settings[key];
+                hasMissingSettings = true;
+            }
+        }
+
+        if (currentSettings.botRunning === true) {
+            currentSettings.botRunning = false;
+            hasMissingSettings = true;
+            // log("Bot was running, changed status to not running.");
+        }
+
+        if (hasMissingSettings) {
+            fs.writeFileSync(settings_location, JSON.stringify(currentSettings, null, 2));
+            // log("Missing or incorrect settings added / corrected.");
+        }
+    }
 }

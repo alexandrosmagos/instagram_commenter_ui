@@ -1,66 +1,6 @@
 require("dotenv").config();
 const fetch = require('node-fetch');
-const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bcrypt');
-
-let db;
-
-function initDatabase() {
-    db = new sqlite3.Database('./settings/proxies.db', (err) => {
-        if (err) {
-            console.error(err.message);
-        }
-        
-        db.run(`CREATE TABLE IF NOT EXISTS proxies(
-            id TEXT PRIMARY KEY,
-            username TEXT,
-            password TEXT,
-            proxy_address TEXT,
-            port INTEGER,
-            valid BOOLEAN,
-            last_verification TEXT,
-            country_code TEXT,
-            city_name TEXT,
-            asn_name TEXT,
-            asn_number TEXT,
-            high_country_confidence BOOLEAN,
-            created_at TEXT
-        );`);
-
-        db.run(`CREATE TABLE IF NOT EXISTS users(
-            id TEXT PRIMARY KEY,
-            username TEXT UNIQUE,
-            password TEXT
-        );`);
-        
-        console.log('Connected to the proxies database.');
-    });
-}
-
-async function registerUser(username, password) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.run(`INSERT INTO users(username, password) VALUES(?, ?)`, [username, hashedPassword], function(err) {
-        if (err) {
-            return console.log(err.message);
-        }
-        console.log(`A row has been inserted with rowid ${this.lastID}`);
-    });
-}
-
-function loginUser(username, password) {
-  return new Promise((resolve, reject) => {
-    db.get(`SELECT * FROM users WHERE username = ?`, [username], async (err, row) => {
-      if (err) {
-        reject(err.message);
-      }
-      if (row && await bcrypt.compare(password, row.password)) {
-        resolve(row);
-      } else {
-        reject('Incorrect username or password');
-      }
-    });
-  });
-}
+const db = require('./database');
 
 async function listProxies(country, page) {
     const url = new URL('https://proxy.webshare.io/api/v2/proxy/list/');
@@ -138,9 +78,6 @@ async function getCountryCities(country) {
 }
 
 module.exports = {
-    registerUser,
-    loginUser,
-    initDatabase,
     listProxies,
     insertProxies,
     initData,

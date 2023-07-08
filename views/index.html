@@ -173,7 +173,76 @@
                 <!-- Setting tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                     <div class="row mb-2">
-                        <div class="col-md-12">
+                        <!-- Instagram related settings -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Instagram Settings</h5>
+                                    <!-- Username -->
+                                    <label for="username">Username</label>
+                                    <input type="text" class="form-control mb-2" id="username" data-setting="IG_USERNAME" placeholder="Username">
+                                    <!-- Password -->
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control mb-2" id="password" data-setting="IG_PASSWORD" placeholder="Password">
+                                    <hr>
+                                    <!-- Media Post Link -->
+                                    <label for="mediaPostLink">Media Post Link</label>
+                                    <input type="text" class="form-control mb-2" id="mediaPostLink" data-setting="mediaLink" placeholder="Enter link here">
+                                    <hr>
+                                    <!-- Usernames for Comments -->
+                                    <label for="usernames">Usernames for Comments (separated by space)</label>
+                                    <input class="form-control mb-2" id="usernames" rows="3" data-setting="usernames" placeholder="Enter usernames here">
+                                    <hr>
+                                    <!-- Save Data -->
+                                    <div class="form-check mt-3">
+                                        <input class="form-check-input" type="checkbox" id="saveDataCheckbox" data-setting="saveData">
+                                        <label class="form-check-label" for="saveDataCheckbox">
+                                            Save Data (Block videos and images)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System running on Settings -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">System Settings</h5>
+                                    <!-- Running On -->
+                                    <label for="runningOn">Running on</label>
+                                    <select class="form-control mb-2" id="runningOn" data-setting="runningOn">
+                                        <option value="WindowsMac">Windows / Mac</option>
+                                        <option value="Linux">Linux</option>
+                                    </select>
+                                    <label for="chromium_headless">Browser Shown/Hidden</label>
+                                    <select class="form-control mb-2" id="chromium_headless" data-setting="chromium_headless">
+                                        <option value="Hidden">Hidden</option>
+                                        <option value="Shown">Shown</option>
+                                    </select>
+                                    <small class="form-text text-muted">Note: If the platform is set to Linux, the browser should be set to Hidden.</small>
+
+                                    <hr>
+
+                                    <!-- Pushover Notifications -->
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" data-setting="pushover_notifications" id="pushover_notifications_toggle">
+                                        <label class="form-check-label" for="pushover_notifications_toggle">
+                                            Enable Pushover Notifications
+                                        </label>
+                                    </div>
+                                    <!-- User Key -->
+                                    <label for="pushoverUser">Pushover User Key</label>
+                                    <input type="password" class="form-control mb-2" id="pushoverUser" data-setting="pushoverUser" placeholder="User Key">
+                                    <!-- Application Token -->
+                                    <label for="pushoverToken">Pushover Application Token</label>
+                                    <input type="password" class="form-control" id="pushoverToken" data-setting="pushoverToken" placeholder="Application Token">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Proxies Settings -->
+                        <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">Proxies</h5>
@@ -182,60 +251,13 @@
                                         <label class="form-check-label" for="proxyToggle">
                                             Enable Proxies
                                         </label>
-
                                         <input type="password" class="form-control mt-2" id="webshare_token" data-setting="webshare_token" placeholder="Enter webshare token here">
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title">Media Post Link</h5>
-                                    <input type="text" class="form-control" id="mediaPostLink" data-setting="mediaLink" placeholder="Enter link here">
-
-                                    <div class="form-check mt-3">
-                                        <input class="form-check-input" type="checkbox" id="saveDataCheckbox" data-setting="saveData">
-                                        <label class="form-check-label" for="saveDataCheckbox">
-                                            Save Data (Block videos and images)
-                                        </label>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title">Username and Password</h5>
-                                    <input type="text" class="form-control mb-2" id="username" data-setting="IG_USERNAME" placeholder="Username">
-                                    <input type="password" class="form-control" id="password" data-setting="IG_PASSWORD" placeholder="Password">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Pushover Notifications</h5>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" data-setting="pushover_notifications" id="pushover_notifications_toggle">
-                                        <label class="form-check-label" for="pushover_notifications_toggle">
-                                            Enable feature
-                                        </label>
-                                    </div>
-                                    <input type="password" class="form-control mb-2" id="pushoverUser" data-setting="pushoverUser" placeholder="User Key">
-                                    <input type="password" class="form-control" id="pushoverToken" data-setting="pushoverToken" placeholder="Application Token">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
 
 
             </div>

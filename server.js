@@ -1,13 +1,12 @@
 require("dotenv").config({ path: "./settings/.env" });
+const os = require('os');
 const express = require("express");
 const session = require("express-session");
 const http = require("http");
 const { Server } = require("socket.io");
-const proxyModule = require("./proxies.js");
-const handleSocketConnection = require("./utils.js");
 
-// Initialize database
-proxyModule.initDatabase();
+const handleSocketConnection = require("./utils.js");
+const { checkIfUserExists, registerUser, loginUser } = require('./user_utils');
 
 const app = express();
 app.use(express.json());
@@ -16,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configure session
 app.use(
     session({
-        secret: "2193n7y!FC$@#$!wqdSsadsa",
+        secret: process.env.session_secret,
         resave: false,
         saveUninitialized: true,
     })
@@ -36,6 +35,12 @@ app.get("/login", (req, res) => {
 
 app.post("/login", handleLogin);
 
+app.get("/register", (req, res) => {
+    res.sendFile(__dirname + "/views/register.html");
+});
+
+app.post("/register", handleRegister);
+
 // Create server
 const server = http.createServer(app);
 
@@ -43,16 +48,14 @@ const server = http.createServer(app);
 const io = new Server(server);
 handleSocketConnection(io);
 
-// Start server
-server.listen(3069, () => {
-    console.log("Server listening on *:3000");
-});
 
 // Middleware for ensuring user is authenticated
-function ensureAuthenticated(req, res, next) {
+async function ensureAuthenticated(req, res, next) {
     if (req.session.user) {
         return next();
     }
+    const userExists = await checkIfUserExists();
+    if (!userExists) return res.redirect("/register");
     res.redirect("/login");
 }
 
@@ -60,10 +63,41 @@ function ensureAuthenticated(req, res, next) {
 async function handleLogin(req, res) {
     const { username, password } = req.body;
     try {
-        const user = await proxyModule.loginUser(username, password);
+        const user = await loginUser(username, password);
         req.session.user = user;
         res.redirect("/");
     } catch (error) {
         res.redirect("/login");
     }
 }
+
+// Middleware for handling registration
+async function handleRegister(req, res) {
+    const { username, password } = req.body;
+
+	if (!username || !password) return res.redirect("/register");
+	if (username.length < 3 || password.length < 3) return res.redirect("/register");
+
+    try {
+        await registerUser(username, password);
+        res.redirect("/login");
+    } catch (error) {
+        res.redirect("/register");
+    }
+}
+
+// Start server
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+	const interfaces = os.networkInterfaces();
+	const addresses = [];
+	for (const name of Object.keys(interfaces)) {
+		for (const interface of interfaces[name]) {
+			const { address, family, internal } = interface;
+			if (family === 'IPv4' && !internal) {
+				addresses.push(address);
+			}
+		}
+	}
+    console.log(`Server running on http://${addresses[0]}:${port} or http://127.0.0.1:${port}`);
+});
