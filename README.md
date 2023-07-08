@@ -9,16 +9,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/alexandrosmagos/instagram_commenter_ui">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="readme_images/logo.png" alt="Logo" width="100" height="100">
   </a>
 
   <h3 align="center">Instagram Giveaway Commenter</h3>
 
   <p align="center">
     An automated Instagram commenter bot built with Node.js and Puppeteer!
-    <br />
-    <a href="https://github.com/alexandrosmagos/instagram_commenter_ui"><strong>Explore the docs »</strong></a>
-    <br />
     <br />
     <a href="https://github.com/alexandrosmagos/instagram_commenter_ui">View Demo</a>
     ·
@@ -47,9 +44,10 @@
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#disclaimer-amp;-acknowledgement">Disclaimer & Acknowledgement</a></li>
+    <li><a href="#credits">Credits</a></li>
   </ol>
 </details>
 
@@ -65,7 +63,7 @@ Instagram Giveaway Commenter is a tool that automates the process of participati
 
 2. **Time Management**: The tool manages comment timings and can delay the next comment based on user-defined minimum and maximum delay values. It avoids spam detection by checking if enough time has passed since the last comment before proceeding with the next one.
 
-3. **Proxy Management**: It allows the use of proxies. The user can enable or disable the proxy usage. In case the proxy is enabled, the tool provides an option to select the desired country and city from a list of available options.
+3. **Proxy Management**: It allows the use of proxies. The user can enable or disable the proxy usage. In case the proxy is enabled, the tool provides an option to select the desired country and city from a list of available options. **Not Yet Finished**
 
 4. **Error Management**: The tool handles errors such as Instagram's 429 error (too many requests) gracefully, by implementing delays and resuming operation when feasible. It also displays the time elapsed since the last 429 error.
 
@@ -107,15 +105,15 @@ This project requires Node.js and npm. You can install them from the official [N
    ```sh
     npm install
    
-4. Start the application by running 'npm start' in your terminal
+4. Start the application by running 'node server.js' in your terminal
 
 ## Usage
 
-After starting the application, you can access the user interface from your web browser by navigating to `http://localhost:3000`. 
+After starting the application, you can access the user interface from your web browser by navigating to one of the links printed on the console, or simply `http://localhost:3000`. 
 
-Fill in the required fields such as the Instagram username and password, and the URL of the post for the giveaway. 
+Fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway. 
 
-After everything is set, press the "Start" button to start the bot. You can also modify various parameters such as comment frequency and proxy settings.
+After everything is set, press the "Start" button to start the bot. If there are any missing parameters, the bot stops and mentions what is missing. You can also modify various parameters in the UI to your liking.
 
 ## Roadmap
 
@@ -133,23 +131,25 @@ To contribute:
 4. Push to the Branch (git push origin feature/AmazingFeature)
 5. Open a Pull Request
 
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
 ## Contact
 
 Alexandros Magos - alexandrosmagos@hotmail.com
 
 Project Link: [https://github.com/alexandrosmagos/instagram_commenter_ui](https://github.com/alexandrosmagos/instagram_commenter_ui)
 
-## Acknowledgments
+## License
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webfx.com/tools/emoji-cheat-sheet)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
+This project is licensed under the AGPL-3.0 License. For more information, please refer to the [LICENSE](LICENSE) file in the repository.
+
+## Disclaimer & Acknowledgement
+
+This project is intended for educational and research purposes only. It demonstrates the capabilities of automation and how it can be utilized to perform certain tasks. The utilization of this project for automating actions on Instagram is contrary to the Instagram Terms of Service. Consequently, users who decide to use this software application should do so at their own risk. I, as the author, do not endorse or promote the use of this project for purposes that violate Instagram's Terms of Service and cannot be held responsible for any misuse or any potential damages arising from such misuse.
+
+## Credits
+
+This project wouldn't be the same without the fantastic animated background it uses. The initial animation had cubes and was a beautiful addition to the project. The cubes were later changed to Teslas to match the theme of the giveaway, which inspired this project.
+
+The animated background was created by Mohammad Abdul Mohaiman. You can find the original work on [Codepen](https://codepen.io/mohaiman/pen/MQqMyo).
 
 [contributors-shield]: https://img.shields.io/github/contributors/alexandrosmagos/instagram_commenter_ui.svg?style=for-the-badge
 [contributors-url]: https://github.com/alexandrosmagos/instagram_commenter_ui/graphs/contributors
