@@ -27,13 +27,18 @@ async function checkMinSettings() {
 		return false;
 	}
 
-	if (!settings.commentMinSec || !settings.commentMaxSec) {
+	if (!settings.commentMinDelay || !settings.commentMaxDelay) {
 		log("Comment delay not set. Go to the main panel tab, and enter the comment delays.");
 		return false;
 	}
 
-	if (!settings.usernames || settings.usernames.split(" ").length < 3) {
-		log("Not enough usernames to comment. Go to the settings tab, and enter at least 3 usernames to comment with.");
+    if (!settings.amountOfUsersToTag) {
+        log("Amount of users to tag is not set. Go to the settings tab, and enter the amount of users to tag.");
+        return false;
+    }
+
+	if (!settings.usernames || settings.usernames.split(" ").length < settings.amountOfUsersToTag) {
+		log(`Not enough usernames to tag. Go to the settings tab, and enter ${settings.amountOfUsersToTag} usernames to tag.`);
 		return false;
 	}
 
@@ -86,7 +91,10 @@ async function startBot() {
             // console.log(`[${new Date().toLocaleTimeString()}] User is still logged in`);
         }
 
-        const delay = getRandomDelay(settings.commentMinSec * 1000, settings.commentMaxSec * 1000);
+        const delay = getRandomDelay(
+            convertToMilliseconds(settings.commentMinDelay, settings.commentMinDelayUnits),
+            convertToMilliseconds(settings.commentMaxDelay, settings.commentMaxDelayUnits)
+        );
 
         // If enough time has passed since the last comment, comment again
         if (Date.now() - settings.lastCommented > delay) {
@@ -266,7 +274,6 @@ async function init_browser() {
 		await login();
 	}
 
-    // if url is not settings.mediaLink, navigate
     if (page.url() !== settings.mediaLink) {
         log(`[${new Date().toLocaleTimeString()}] Navigating to ${settings.mediaLink}`);
         await page.goto(settings.mediaLink);
@@ -315,32 +322,30 @@ async function login() {
 }
 
 async function commentOnPost() {
-
     const users = settings.usernames.split(" ").filter((x) => x !== ""); // splits usernames into array and removes empty strings
 
-	const randomUsers = users.sort(() => 0.5 - Math.random()).slice(0, 3);
+    const randomUsers = users.sort(() => 0.5 - Math.random()).slice(0, settings.amountOfUsersToTag);
 
-	const comment = `${randomUsers[0]} ${randomUsers[1]} ${randomUsers[2]} `;
+    const comment = randomUsers.join(' ') + ' ';
 
-	try {
-		await page.waitForSelector('textarea[aria-label="Add a comment…"]');
-	} catch (error) {
+    try {
+        await page.waitForSelector('textarea[aria-label="Add a comment…"]');
+    } catch (error) {
         console.log("comment selector not found, logging in");
-		await login();
-		await page.waitForSelector('textarea[aria-label="Add a comment…"]');
-	}
+        await login();
+        await page.waitForSelector('textarea[aria-label="Add a comment…"]');
+    }
 
-	await page.type('textarea[aria-label="Add a comment…"]', comment, { delay: 60 });
+    await page.type('textarea[aria-label="Add a comment…"]', comment, { delay: 60 });
 
-	page.waitForTimeout(350);
-	await page.keyboard.press("Enter");
+    page.waitForTimeout(350);
+    await page.keyboard.press("Enter");
 
-	log(`[${new Date().toLocaleTimeString()}] Commented '${comment}'`);
+    log(`[${new Date().toLocaleTimeString()}] Commented '${comment}'`);
     settings.lastCommented = Date.now();
 
-	await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 }
-
 
 // Socket Handling
 async function handleSocketConnection(socket) {
@@ -460,6 +465,10 @@ function getRandomDelay(min, max) {
 	return Math.random() * (max - min) + min;
 }
 
+function convertToMilliseconds(value, units) {
+    return value * (units === 'Minutes' ? 60000 : 1000);
+}
+
 function incrementCounter() {
 	if (!settings.counter) {
 		settings.counter = 0;
@@ -525,8 +534,10 @@ function init_settings() {
         stopDate: "2023-09-01",
         mediaLink: "",
         lastCommented: "0",
-        commentMinSec: "350",
-        commentMaxSec: "900",
+        commentMinDelay: "350",
+        commentMinDelayUnits: "seconds",
+        commentMaxDelay: "900",
+        commentMaxDelayUnits: "seconds",
         last429: "",
         usernames: "",
         spamPauseUntil: 0,
@@ -541,7 +552,7 @@ function init_settings() {
 
     if (!fs.existsSync(settings_location)) {
         fs.writeFileSync(settings_location, JSON.stringify(default_settings, null, 2));
-        // log("Default / Initial settings applied.");
+        console.log("Default / Initial settings applied.");
     } else {
         const currentSettings = JSON.parse(fs.readFileSync(settings_location, "utf8"));
         let hasMissingSettings = false;
@@ -556,12 +567,12 @@ function init_settings() {
         if (currentSettings.botRunning === true) {
             currentSettings.botRunning = false;
             hasMissingSettings = true;
-            // log("Bot was running, changed status to not running.");
+            console.log("Bot was running, changed status to not running.");
         }
 
         if (hasMissingSettings) {
             fs.writeFileSync(settings_location, JSON.stringify(currentSettings, null, 2));
-            // log("Missing or incorrect settings added / corrected.");
+            console.log("Missing or incorrect settings added / corrected.");
         }
     }
 }

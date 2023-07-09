@@ -91,17 +91,35 @@
                             <div class="card mb-4">
                                 <div class="card-body">
                                     <h5 class="card-title">Comment Delay</h5>
-                                    <div class="mb-3">
-                                        <label for="minDelay" class="form-label">Minimum Delay (Seconds)</label>
-                                        <input type="number" class="form-control" data-setting="commentMinSec" id="minDelay">
+                                    <p class="text-muted mb-2 pb-2">Adjust the delay between each comment. Use the drop-down to select seconds or minutes.</p>
+                                    <div class="mb-3 row">
+                                        <label for="minDelay" class="form-label col-md-4 ms-2">Minimum Delay</label>
+                                        <div class="col-md-3">
+                                            <input type="number" class="form-control" data-setting="commentMinDelay" id="minDelay">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-control" id="commentMinDelayUnits" data-setting="commentMinDelayUnits">
+                                                <option value="seconds">Seconds</option>
+                                                <option value="minutes">Minutes</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="maxDelay" class="form-label">Maximum Delay (Seconds)</label>
-                                        <input type="number" class="form-control" data-setting="commentMaxSec" id="maxDelay">
+                                    <div class="mb-3 row">
+                                        <label for="maxDelay" class="form-label col-md-4 ms-2">Maximum Delay</label>
+                                        <div class="col-md-3">
+                                            <input type="number" class="form-control" data-setting="commentMaxDelay" id="maxDelay">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-control" id="commentMaxDelayUnits" data-setting="commentMaxDelayUnits">
+                                                <option value="seconds">Seconds</option>
+                                                <option value="minutes">Minutes</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="row">
@@ -191,7 +209,12 @@
                                     <hr>
                                     <!-- Usernames for Comments -->
                                     <label for="usernames">Usernames for Comments (separated by space)</label>
+                                    <!-- Tags preview -->
+                                    <div id="usernamesPreview" class="mb-2"></div>
                                     <input class="form-control mb-2" id="usernames" rows="3" data-setting="usernames" placeholder="Enter usernames here">
+                                    <!-- Amount of users to tag -->
+                                    <label for="amountOfUsersToTag">Amount of Users to Tag per Comment</label>
+                                    <input type="number" class="form-control mb-2" id="amountOfUsersToTag" data-setting="amountOfUsersToTag" placeholder="Enter amount of users to tag per comment">
                                     <hr>
                                     <!-- Save Data -->
                                     <div class="form-check mt-3">
@@ -245,7 +268,7 @@
                         <div class="col-md-4">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title">Proxies</h5>
+                                    <h5 class="card-title">Proxies (Not Yet Implemented)</h5>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" data-setting="proxies_enabled" id="proxyToggle">
                                         <label class="form-check-label" for="proxyToggle">

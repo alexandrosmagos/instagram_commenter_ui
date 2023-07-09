@@ -1,8 +1,8 @@
 // Initialize Variables
 const socket = io();
-const { logsArea, commentsPosted, daysUntilEnd, endDatePicker, minDelay, maxDelay, timeSinceError_title, timeSinceError_body, 
+const { logsArea, commentsPosted, daysUntilEnd, endDatePicker, minDelay, minDelayUnits, maxDelay, maxDelayUnits, timeSinceError_title, timeSinceError_body, 
 startButton, stopButton, mediaPostLink, clearLogs_btn, saveDataCheckbox, proxyToggle, totalProxies, availableCountries, availableCities, webshare_token_input, 
-pushover_notifications_toggle, pushover_userKey, pushover_appkey } = initializeDOMElements();
+pushover_notifications_toggle, pushover_userKey, pushover_appkey, usernamesInput, usernamesPreview, runningOn, chromium_headless } = initializeDOMElements();
 
 // Set Event Listeners
 setSocketEvents();
@@ -17,7 +17,9 @@ function initializeDOMElements() {
 		daysUntilEnd: document.getElementById("daysUntilEnd"),
 		endDatePicker: document.getElementById("endDate"),
 		minDelay: document.getElementById("minDelay"),
+		minDelayUnits: document.getElementById("commentMinDelayUnits"),
 		maxDelay: document.getElementById("maxDelay"),
+		maxDelayUnits: document.getElementById("commentMaxDelayUnits"),
 		timeSinceError_title: document.getElementById("timeSinceError_title"),
 		timeSinceError_body: document.getElementById("timeSinceError_body"),
 		startButton: document.getElementById("startButton"),
@@ -33,7 +35,9 @@ function initializeDOMElements() {
 		pushover_notifications_toggle: document.getElementById("pushover_notifications_toggle"),
 		pushover_userKey: document.getElementById("pushoverUser"),
 		pushover_appkey: document.getElementById("pushoverToken"),
-		usernames: document.getElementById("usernames"),
+		usernamesPreview: document.getElementById("usernamesPreview"),
+		usernamesInput: document.getElementById("usernames"),
+		amountOfUsersToTag: document.getElementById("amountOfUsersToTag"),
 		runningOn: document.getElementById("runningOn"),
 		chromium_headless: document.getElementById("chromium_headless"),
 	};
@@ -156,7 +160,10 @@ function setSocketEvents() {
 
 		mediaPostLink.value = msg.settings.mediaLink;
 
-        usernames.value = msg.settings.usernames;
+        usernamesInput.value = msg.settings.usernames;
+        amountOfUsersToTag.value = msg.settings.amountOfUsersToTag;
+		setUsernameTags();
+		
 
 		const stopDate = new Date(msg.settings.stopDate);
 		const today = new Date();
@@ -166,8 +173,10 @@ function setSocketEvents() {
 
 		endDatePicker.valueAsDate = stopDate;
 
-		minDelay.value = msg.settings.commentMinSec;
-		maxDelay.value = msg.settings.commentMaxSec;
+		minDelay.value = msg.settings.commentMinDelay;
+		minDelayUnits.value = msg.settings.commentMinDelayUnits;
+		maxDelay.value = msg.settings.commentMaxDelay;
+		maxDelayUnits.value = msg.settings.commentMaxDelayUnits;
 
 		if (msg.settings.spamPauseUntil.length > 0 && msg.settings.last429.length > 0) {
 			timeSinceError_title.innerText = "Spam detected and 429 error";
@@ -229,6 +238,23 @@ function setInputEventListeners() {
 		socket.emit("countrySelected", selectedCountry);
 		console.log(`Country selected: ${selectedCountry}`);
 	});
+
+	usernamesInput.addEventListener('input', () => {
+		setUsernameTags();
+	});
+}
+
+function setUsernameTags() {
+	const usernames = usernamesInput.value.split(' ');
+		usernamesPreview.innerHTML = '';
+		for (let username of usernames) {
+			if (username) {
+				const tag = document.createElement('span');
+				tag.className = 'username-tag';
+				tag.textContent = username;
+				usernamesPreview.appendChild(tag);
+			}
+		}
 }
 
 function setButtonEventListeners() {
