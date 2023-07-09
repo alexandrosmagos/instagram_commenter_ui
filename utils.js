@@ -338,7 +338,7 @@ async function commentOnPost() {
 
     await page.type('textarea[aria-label="Add a comment…"]', comment, { delay: 60 });
 
-    page.waitForTimeout(350);
+    await page.waitForTimeout(350);
     await page.keyboard.press("Enter");
 
     log(`[${new Date().toLocaleTimeString()}] Commented '${comment}'`);
@@ -471,7 +471,7 @@ function getRandomDelay(min, max) {
 }
 
 function convertToMilliseconds(value, units) {
-    return value * (units === 'Minutes' ? 60000 : 1000);
+    return value * (units === 'minutes' ? 60000 : 1000);
 }
 
 function incrementCounter() {
