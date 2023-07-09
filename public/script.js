@@ -35,6 +35,7 @@ function initializeDOMElements() {
 		pushover_notifications_toggle: document.getElementById("pushover_notifications_toggle"),
 		pushover_userKey: document.getElementById("pushoverUser"),
 		pushover_appkey: document.getElementById("pushoverToken"),
+		testNotification: document.getElementById("testNotification"),
 		usernamesPreview: document.getElementById("usernamesPreview"),
 		usernamesInput: document.getElementById("usernames"),
 		amountOfUsersToTag: document.getElementById("amountOfUsersToTag"),
@@ -123,19 +124,23 @@ function setSocketEvents() {
 			pushover_notifications_toggle.checked = true;
 			pushover_userKey.disabled = false;
 			pushover_appkey.disabled = false;
+			testNotification.disabled = false;
 		} else {
 			pushover_notifications_toggle.checked = false;
 			pushover_userKey.disabled = true;
 			pushover_appkey.disabled = true;
+			testNotification.disabled = true;
 		}
 
 		pushover_notifications_toggle.addEventListener("change", () => {
 			if (pushover_notifications_toggle.checked) {
 				pushover_userKey.disabled = false;
 				pushover_appkey.disabled = false;
+				testNotification.disabled = false;
 			} else {
 				pushover_userKey.disabled = true;
 				pushover_appkey.disabled = true;
+				testNotification.disabled = true;
 			}
 		});
 
@@ -241,6 +246,10 @@ function setInputEventListeners() {
 
 	usernamesInput.addEventListener('input', () => {
 		setUsernameTags();
+	});
+
+	testNotification.addEventListener("click", () => {
+		socket.emit("testNotification");
 	});
 }
 

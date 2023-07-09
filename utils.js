@@ -401,6 +401,11 @@ async function handleSocketConnection(socket) {
             socket.emit('cities', cities);
         });
     });
+
+    socket.on('testNotification', () => {
+        console.log('Test notification received');
+        sendPushoverNotification('Test Notification', 'This is a test notification');
+    });
 }
 
 // Helper Functions
