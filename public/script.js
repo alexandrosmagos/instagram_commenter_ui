@@ -46,7 +46,6 @@ function initializeDOMElements() {
 
 function setSocketEvents() {
 	socket.on("log", (msg) => {
-		// Update the logs area with the new log
 		logsArea.value += msg + "\n";
 		logsArea.scrollTop = logsArea.scrollHeight;
 
@@ -66,144 +65,13 @@ function setSocketEvents() {
 	});
 
 	socket.on("data", (msg) => {
-		console.log(msg);
-		logsArea.value = msg.lines + "\n";
-		logsArea.scrollTop = logsArea.scrollHeight;
+        console.log(msg);
+        updatePanelTab(msg);
+        updateProxiesTab(msg);
+        updateSettingsTab(msg);
+    });
 
-		if (msg.env.IG_USERNAME.length > 0) {
-			document.getElementById("username").value = msg.env.IG_USERNAME;
-		}
-
-		if (msg.env.IG_PASSWORD.length > 0) {
-			document.getElementById("password").value = msg.env.IG_PASSWORD;
-		}
-
-		commentsPosted.innerText = msg.settings.counter;
-
-		saveDataCheckbox.checked = msg.settings.saveData;
-
-		if (msg.env.webshare_token.length > 0) webshare_token_input.value = msg.env.webshare_token;
-
-		proxyToggle.addEventListener("change", () => {
-			if (proxyToggle.checked) {
-				webshare_token_input.disabled = false;
-				document.getElementById("proxies-tab").classList.remove("disabled");
-			} else {
-				webshare_token_input.disabled = true;
-				document.getElementById("proxies-tab").classList.add("disabled");
-			}
-		});
-
-		if (!msg.settings.proxies_enabled) {
-			proxyToggle.checked = false;
-			webshare_token_input.disabled = true;
-			document.getElementById("proxies-tab").classList.add("disabled");
-		} else {
-			proxyToggle.checked = true;
-			webshare_token_input.disabled = false;
-			document.getElementById("proxies-tab").classList.remove("disabled");
-		}
-
-        if (msg.proxies) {
-            if (msg.proxies.totalProxies) totalProxies.innerText = msg.proxies.totalProxies;
-
-            if (msg.proxies.countries.length > 0) {
-                availableCountries.innerHTML = "";
-
-                msg.proxies.countries.forEach((country) => {
-                    const option = document.createElement("option");
-                    option.value = country.country_code;
-                    option.innerText = country.country_code;
-                    availableCountries.appendChild(option);
-                });
-            }
-        }
-
-
-		if (msg.settings.pushover_notifications) {
-			pushover_notifications_toggle.checked = true;
-			pushover_userKey.disabled = false;
-			pushover_appkey.disabled = false;
-			testNotification.disabled = false;
-		} else {
-			pushover_notifications_toggle.checked = false;
-			pushover_userKey.disabled = true;
-			pushover_appkey.disabled = true;
-			testNotification.disabled = true;
-		}
-
-		pushover_notifications_toggle.addEventListener("change", () => {
-			if (pushover_notifications_toggle.checked) {
-				pushover_userKey.disabled = false;
-				pushover_appkey.disabled = false;
-				testNotification.disabled = false;
-			} else {
-				pushover_userKey.disabled = true;
-				pushover_appkey.disabled = true;
-				testNotification.disabled = true;
-			}
-		});
-
-        if (msg.env.pushoverToken.length > 0) pushover_appkey.value = msg.env.pushoverToken;
-        if (msg.env.pushoverUser.length > 0) pushover_userKey.value = msg.env.pushoverUser;
-
-
-		if (msg.settings.botRunning) {
-			startButton.disabled = true;
-			stopButton.disabled = false;
-		} else {
-			startButton.disabled = false;
-			stopButton.disabled = true;
-		}
-
-		if (msg.settings.chromium_headless.length > 0) chromium_headless.value = msg.settings.chromium_headless;
-		if (msg.settings.runningOn.length > 0) {
-			runningOn.value = msg.settings.runningOn;
-			if (msg.settings.runningOn === "Linux") chromium_headless.disabled = true;
-		}
-
-
-		mediaPostLink.value = msg.settings.mediaLink;
-
-        usernamesInput.value = msg.settings.usernames;
-        amountOfUsersToTag.value = msg.settings.amountOfUsersToTag;
-		setUsernameTags();
-		
-
-		const stopDate = new Date(msg.settings.stopDate);
-		const today = new Date();
-		const timeDiff = stopDate.getTime() - today.getTime();
-		const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
-		daysUntilEnd.innerText = daysUntil;
-
-		endDatePicker.valueAsDate = stopDate;
-
-		minDelay.value = msg.settings.commentMinDelay;
-		minDelayUnits.value = msg.settings.commentMinDelayUnits;
-		maxDelay.value = msg.settings.commentMaxDelay;
-		maxDelayUnits.value = msg.settings.commentMaxDelayUnits;
-
-		if (msg.settings.spamPauseUntil.length > 0 && msg.settings.last429.length > 0) {
-			timeSinceError_title.innerText = "Spam detected and 429 error";
-		} else if (msg.settings.spamPauseUntil.length > 0) {
-			timeSinceError_title.innerText = "Spam detected";
-			timeSinceError_body.innerText = msg.settings.spamPauseUntil;
-		} else if (msg.settings.last429.length > 0) {
-			timeSinceError_title.innerText = "Time since 429 error";
-
-			const last429 = new Date(msg.settings.last429);
-			setInterval(() => {
-				const today = new Date();
-				const timeDiff = today.getTime() - last429.getTime();
-				const minutesSince = Math.floor(timeDiff / 1000 / 60);
-				const secondsSince = Math.floor(timeDiff / 1000) - minutesSince * 60;
-				timeSinceError_body.innerText = `${minutesSince} minutes, and ${secondsSince} seconds.`;
-			}, 1000);
-		} else {
-			timeSinceError_title.innerText = "No errors";
-			timeSinceError_body.innerText = "";
-		}
-	});
+	
 }
 
 function setInputEventListeners() {
@@ -253,19 +121,6 @@ function setInputEventListeners() {
 	});
 }
 
-function setUsernameTags() {
-	const usernames = usernamesInput.value.split(' ');
-		usernamesPreview.innerHTML = '';
-		for (let username of usernames) {
-			if (username) {
-				const tag = document.createElement('span');
-				tag.className = 'username-tag';
-				tag.textContent = username;
-				usernamesPreview.appendChild(tag);
-			}
-		}
-}
-
 function setButtonEventListeners() {
 	startButton.addEventListener("click", () => {
 		socket.emit("start");
@@ -284,7 +139,123 @@ function setButtonEventListeners() {
 	});
 }
 
-// Additional Function Definitions
+function updatePanelTab(msg) {
+    // update the logs
+    logsArea.value = msg.lines + "\n";
+    logsArea.scrollTop = logsArea.scrollHeight;
+
+    // update the comments posted
+    commentsPosted.innerText = msg.settings.counter;
+
+    // update the stop date
+    const stopDate = new Date(msg.settings.stopDate);
+    const today = new Date();
+    const timeDiff = stopDate.getTime() - today.getTime();
+    const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    daysUntilEnd.innerText = daysUntil;
+
+    // update the bot controls
+    if (msg.settings.botRunning) {
+        startButton.disabled = true;
+        stopButton.disabled = false;
+    } else {
+        startButton.disabled = false;
+        stopButton.disabled = true;
+    }
+
+    // update error handling info
+    if (msg.settings.spamPauseUntil.length > 0 && msg.settings.last429.length > 0) {
+        timeSinceError_title.innerText = "Spam detected and 429 error";
+    } else if (msg.settings.spamPauseUntil.length > 0) {
+        timeSinceError_title.innerText = "Spam detected";
+        timeSinceError_body.innerText = msg.settings.spamPauseUntil;
+    } else if (msg.settings.last429.length > 0) {
+        timeSinceError_title.innerText = "Time since 429 error";
+
+        const last429 = new Date(msg.settings.last429);
+        setInterval(() => {
+            const today = new Date();
+            const timeDiff = today.getTime() - last429.getTime();
+            const minutesSince = Math.floor(timeDiff / 1000 / 60);
+            const secondsSince = Math.floor(timeDiff / 1000) - minutesSince * 60;
+            timeSinceError_body.innerText = `${minutesSince} minutes, and ${secondsSince} seconds.`;
+        }, 1000);
+    } else {
+        timeSinceError_title.innerText = "No errors";
+        timeSinceError_body.innerText = "";
+    }
+}
+
+function updateProxiesTab(msg) {
+    // update the proxy info
+    if (msg.proxies) {
+        if (msg.proxies.totalProxies) totalProxies.innerText = msg.proxies.totalProxies;
+
+        if (msg.proxies.countries.length > 0) {
+            availableCountries.innerHTML = "";
+
+            msg.proxies.countries.forEach((country) => {
+                const option = document.createElement("option");
+                option.value = country.country_code;
+                option.innerText = country.country_code;
+                availableCountries.appendChild(option);
+            });
+        }
+    }
+}
+
+function updateSettingsTab(msg) {
+    // update the Instagram settings
+    if (msg.env.IG_USERNAME.length > 0) document.getElementById("username").value = msg.env.IG_USERNAME;
+    if (msg.env.IG_PASSWORD.length > 0) document.getElementById("password").value = msg.env.IG_PASSWORD;
+    saveDataCheckbox.checked = msg.settings.saveData;
+    mediaPostLink.value = msg.settings.mediaLink;
+    usernamesInput.value = msg.settings.usernames;
+    amountOfUsersToTag.value = msg.settings.amountOfUsersToTag;
+    setUsernameTags();
+
+    // update the comment delay settings
+    minDelay.value = msg.settings.commentMinDelay;
+    minDelayUnits.value = msg.settings.commentMinDelayUnits;
+    maxDelay.value = msg.settings.commentMaxDelay;
+    maxDelayUnits.value = msg.settings.commentMaxDelayUnits;
+
+    // update the Pushover settings
+    if (msg.settings.pushover_notifications) {
+        pushover_notifications_toggle.checked = true;
+        pushover_userKey.disabled = false;
+        pushover_appkey.disabled = false;
+        testNotification.disabled = false;
+    } else {
+        pushover_notifications_toggle.checked = false;
+        pushover_userKey.disabled = true;
+        pushover_appkey.disabled = true;
+        testNotification.disabled = true;
+    }
+    if (msg.env.pushoverToken.length > 0) pushover_appkey.value = msg.env.pushoverToken;
+    if (msg.env.pushoverUser.length > 0) pushover_userKey.value = msg.env.pushoverUser;
+
+    // update the running settings
+    if (msg.settings.chromium_headless.length > 0) chromium_headless.value = msg.settings.chromium_headless;
+    if (msg.settings.runningOn.length > 0) {
+        runningOn.value = msg.settings.runningOn;
+        if (msg.settings.runningOn === "Linux") chromium_headless.disabled = true;
+    }
+}
+
+
+function setUsernameTags() {
+	const usernames = usernamesInput.value.split(' ');
+		usernamesPreview.innerHTML = '';
+		for (let username of usernames) {
+			if (username) {
+				const tag = document.createElement('span');
+				tag.className = 'username-tag';
+				tag.textContent = username;
+				usernamesPreview.appendChild(tag);
+			}
+		}
+}
 
 function showToast(title, msg) {
 	let toast = {
