@@ -64,7 +64,7 @@ body {
 	list-style: none;
 	width: 20px;
 	height: 20px;
-	background: url("/background_tesla.avif") no-repeat center/contain;
+	background: url("/theme.png") no-repeat center/contain;
 	background-size: contain;
 	animation: animate 25s linear infinite;
 	bottom: -150px;
