@@ -154,6 +154,9 @@ function updatePanelTab(msg) {
     const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
     daysUntilEnd.innerText = daysUntil;
 
+	// set end date picker
+	endDatePicker.valueAsDate = stopDate;
+
     // update the bot controls
     if (msg.settings.botRunning) {
         startButton.disabled = true;
@@ -241,6 +244,27 @@ function updateSettingsTab(msg) {
         runningOn.value = msg.settings.runningOn;
         if (msg.settings.runningOn === "Linux") chromium_headless.disabled = true;
     }
+
+	// proxy card
+	proxyToggle.addEventListener("change", () => {
+		if (proxyToggle.checked) {
+			webshare_token_input.disabled = false;
+			document.getElementById("proxies-tab").classList.remove("disabled");
+		} else {
+			webshare_token_input.disabled = true;
+			document.getElementById("proxies-tab").classList.add("disabled");
+		}
+	});
+
+	if (!msg.settings.proxies_enabled) {
+		proxyToggle.checked = false;
+		webshare_token_input.disabled = true;
+		document.getElementById("proxies-tab").classList.add("disabled");
+	} else {
+		proxyToggle.checked = true;
+		webshare_token_input.disabled = false;
+		document.getElementById("proxies-tab").classList.remove("disabled");
+	}
 }
 
 
