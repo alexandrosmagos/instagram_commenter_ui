@@ -111,7 +111,7 @@ This project requires Node.js and npm. You can install them from the official [N
    ```sh
     npm install
    
-4. Start the application by running 'node server.js' in your terminal
+4. Start the application by running `'node server'` in your terminal
 
 ## Usage
 
@@ -125,7 +125,12 @@ After everything is set, press the "Start" button to start the bot. If there are
 
 ## Roadmap
 
+- Note that the current version of the bot does not have proxy support integrated yet. This is a planned feature for a future release.
+
+- Also, there is currently no automated handling of Two-Factor Authentication (2FA) during the login process. If 2FA pop up while the bot log in, it will probably just stay there. This is another area where enhancements are planned for future releases.
+
 See the [open issues](https://github.com/alexandrosmagos/instagram_commenter_ui/issues) for a list of proposed features (and known issues).
+
 
 ## Screenshots
 
