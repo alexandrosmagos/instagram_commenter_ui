@@ -45,6 +45,7 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#bot-operation-and-error-management ">Bot Operation and Error Management</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#disclaimer-amp;-acknowledgement">Disclaimer & Acknowledgement</a></li>
@@ -116,7 +117,9 @@ This project requires Node.js and npm. You can install them from the official [N
 
 After starting the application, you can access the user interface from your web browser by navigating to one of the links printed on the console, or simply `http://localhost:3000`. 
 
-Fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway. 
+The first page to automatically load up should be the register page. Once registered, the register page won't show up again.
+
+After logging in, fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway. 
 
 After everything is set, press the "Start" button to start the bot. If there are any missing parameters, the bot stops and mentions what is missing. You can also modify various parameters in the UI to your liking.
 
@@ -139,6 +142,39 @@ You can adjust various parameters here, like Instagram credentials, the link to 
 ### Proxies Tab
 ![Proxies Tab](readme_images/proxies.gif)
 Manage your proxies. You can add, update, and delete proxies. You can also validate the proxy settings here.
+
+
+## Bot Operation and Error Management 
+
+This bot works by making requests to Instagram's servers, imitating a user's interaction with the website. It uses an advanced browser automation library (Puppeteer) to drive these interactions.
+
+The bot has several built-in mechanisms to handle various scenarios and server responses to ensure its operation is as smooth as possible and longevity. Here are some key points:
+
+<dl>
+  <dt>1. 400 Errors (Bad Request)</dt>
+  <dd>When the bot receives a 400 error from Instagram's servers, it checks if the error is related to a 'spam' flag on the bot's activity. Instagram can sometimes detect bot activity and mark it as spam, imposing a temporary block on commenting. <br />
+  In such cases, the bot will enter a pause mode and stop all activity until the specified date in the 'feedback_message' returned in Instagram's response. The bot can parse a date string from the feedback message and calculate the delay required.</dd>
+
+
+<dt>2. 429 Errors (Too Many Requests)</dt>
+<dd>A 429 status code means that the bot has exceeded the rate limits imposed by Instagram. To mitigate this, the bot enters a pause state for 30 minutes upon receiving a 429 status code. During this pause, all activity is halted to ensure compliance with Instagram's rate limits. <br />
+In addition to this, the bot also keeps track of the last time it received a 429 status code. This information can be used to identify patterns and adjust the bot's behavior to prevent future rate limit exceedances.</dd>
+
+
+<dt>3. 401 Errors (Unauthorized)</dt>
+<dd>If a 401 error is received, it means the session's authentication has expired or is otherwise invalid. To fix this, the bot re-authenticates by logging back in.</dd>
+
+<dt>4. Session Management and Cookies</dt>
+<dd>The bot also utilizes cookies to maintain a session with Instagram. If the bot has previous cookies stored, it will load them into the browser before starting operations. However, if the cookies are expired, the bot will perform a new login to get a fresh set of cookies.<br />
+The bot continually checks and updates the cookies file with the current session's cookies to ensure a smooth operation for longer periods of time.</dd>
+
+<dt>5. Adaptive Delays</dt>
+<dd>To simulate human behavior more accurately and to adhere to Instagram's usage policies, the bot employs adaptive delays between actions (like posting comments). These delays are not fixed but rather randomly determined within a defined range to make the bot's activity pattern less predictable and more human-like. This can help evade Instagram's anti-bot mechanisms.<br />
+
+The delay range can be specified in either seconds or minutes and the actual delay is calculated at runtime. The bot keeps track of the last time it commented and checks against the delay to decide if it should comment again.</dd>
+
+</dl>
+This bot is designed with the goal of longevity and sustainability in mind, rather than short-term aggressive activity, which can lead to permanent bans.
 
 
 ## Contributing
