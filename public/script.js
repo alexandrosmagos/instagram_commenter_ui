@@ -2,7 +2,7 @@
 const socket = io();
 const { logsArea, commentsPosted, daysUntilEnd, endDatePicker, minDelay, minDelayUnits, maxDelay, maxDelayUnits, timeSinceError_title, timeSinceError_body, 
 startButton, stopButton, mediaPostLink, clearLogs_btn, saveDataCheckbox, proxyToggle, totalProxies, availableCountries, availableCities, webshare_token_input, 
-pushover_notifications_toggle, pushover_userKey, pushover_appkey, usernamesInput, usernamesPreview, runningOn, chromium_headless } = initializeDOMElements();
+pushover_notifications_toggle, pushover_userKey, pushover_appkey, usernamesInput, usernamesPreview, runningOn, chromium_headless, logoutButton } = initializeDOMElements();
 
 // Set Event Listeners
 setSocketEvents();
@@ -41,6 +41,7 @@ function initializeDOMElements() {
 		amountOfUsersToTag: document.getElementById("amountOfUsersToTag"),
 		runningOn: document.getElementById("runningOn"),
 		chromium_headless: document.getElementById("chromium_headless"),
+		logoutButton: document.getElementById("logoutButton"),
 	};
 }
 
@@ -136,6 +137,14 @@ function setButtonEventListeners() {
 
 	clearLogs_btn.addEventListener("click", () => {
 		logsArea.value = "";
+	});
+
+	logoutButton.addEventListener("click", () => {
+		fetch('/logout', { method: 'POST' })
+        .then(() => {
+            window.location.href = '/';
+        })
+        .catch(error => console.error('Error:', error));
 	});
 }
 

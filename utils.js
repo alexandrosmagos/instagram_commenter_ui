@@ -219,6 +219,10 @@ async function init_browser() {
 				is429 = true;
 				log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
 
+                if (settings.pushover_notifications) {
+                    sendPushoverNotification('429..', `[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
+                }
+
 				updateSetting("last429", new Date().toISOString());
 
 				isDelaying = true;

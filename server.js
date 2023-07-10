@@ -9,6 +9,7 @@ const handleSocketConnection = require("./utils.js");
 const { checkIfUserExists, registerUser, loginUser } = require('./user_utils');
 
 const app = express();
+app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,20 +27,30 @@ app.use(express.static("public"));
 
 // Routes
 app.get("/", ensureAuthenticated, (req, res) => {
-    res.sendFile(__dirname + "/views/index.html");
+    res.render('index.ejs', { username: req.session.user.username });
 });
 
-app.get("/login", (req, res) => {
-    res.sendFile(__dirname + "/views/login.html");
+app.get('/login', (req, res) => {
+    res.render('auth.ejs', { action: 'login' });
+});
+
+app.get('/register', (req, res) => {
+    res.render('auth.ejs', { action: 'register' });
 });
 
 app.post("/login", handleLogin);
 
-app.get("/register", (req, res) => {
-    res.sendFile(__dirname + "/views/register.html");
-});
-
 app.post("/register", handleRegister);
+
+app.post("/logout", function(req, res){
+    req.session.destroy(function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect('/');
+        }
+    });
+});
 
 // Create server
 const server = http.createServer(app);
