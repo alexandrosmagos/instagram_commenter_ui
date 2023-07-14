@@ -223,6 +223,6 @@ The animated background was created by Mohammad Abdul Mohaiman. You can find the
 [issues-shield]: https://img.shields.io/github/issues/alexandrosmagos/instagram_commenter_ui.svg?style=for-the-badge
 [issues-url]: https://github.com/alexandrosmagos/instagram_commenter_ui/issues
 [license-shield]: https://img.shields.io/github/license/alexandrosmagos/instagram_commenter_ui.svg?style=for-the-badge
-[license-url]: https://github.com/alexandrosmagos/instagram_commenter_ui/blob/master/LICENSE.txt
+[license-url]: https://github.com/alexandrosmagos/instagram_commenter_ui/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/alexandrosmagos
