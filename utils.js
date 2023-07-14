@@ -54,8 +54,7 @@ async function checkMinSettings() {
 async function startBot() {
 	settings.botRunning = true;
 	updateSetting("botRunning", settings.botRunning);
-
-	log(`Bot has started at ${new Date().toLocaleTimeString()}`);
+	log(`Bot has started at ${new Date()}.`);
 
 	// check min settings
 	const minSettings = await checkMinSettings();
@@ -72,6 +71,8 @@ async function startBot() {
 	}
 
 	while (settings.botRunning && new Date() < new Date(settings.stopDate)) {
+        if (!settings.botRunning) return;
+        
         while (isDelaying) {
             await new Promise((resolve) => setTimeout(resolve, 5000)); // Check every 5 seconds
         }
@@ -82,7 +83,6 @@ async function startBot() {
 
             // if not logged in, log in
             if (loginCheck.length > 0) {
-                console.log(`[${new Date().toLocaleTimeString()}] 111`);
                 await login();
                 log(`[${new Date().toLocaleTimeString()}] Navigating to post`);
                 await page.goto(settings.mediaLink, { waitUntil: "networkidle2" });
@@ -125,6 +125,11 @@ function stopBot() {
 }
 
 async function init_browser() {
+    // const host = "p.webshare.io"
+    // const port = 10093;
+    // const username = '';
+    // const password = '';
+
 	const isHeadless = settings.chromium_headless === "Hidden" ? "new" : false;
     const isLinux = settings.runningOn === "Linux";
 
@@ -132,9 +137,14 @@ async function init_browser() {
         browser = await puppeteer.launch({
             headless: isLinux ? "new" : isHeadless,
             executablePath: isLinux ? "/usr/bin/chromium-browser" : undefined,
+            // args: [
+            //     `--proxy-server=http://${host}:${port}`,
+            // ]
         });
 
         page = await browser.newPage();
+        
+        // await page.authenticate({username, password});
     } catch (error) {
         console.error(`Failed to launch the browser. Error: ${error}`);
         log("Browser could not be started. Please make sure you have selected the correct platform in the settings.");
@@ -166,9 +176,9 @@ async function init_browser() {
 		if (status === 429 && !is429) {
 			is429 = true;
 			errorOccurred = true;
-			log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
+			log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error `);
             if (settings.pushover_notifications) {
-                sendPushoverNotification('429..', `[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
+                sendPushoverNotification('429..', `Pausing for 30 minutes due to 429 error`);
             }
 
 			updateSetting("last429", new Date().toISOString());
@@ -201,7 +211,7 @@ async function init_browser() {
 
 					log(`[${new Date().toLocaleTimeString()}] Spam detected. Pausing until ${dateString}.`);
                     if (settings.pushover_notifications) {
-                        sendPushoverNotification('Spam Detected..', `[${new Date().toLocaleTimeString()}] Spam detected. Pausing until ${dateString}.`);
+                        sendPushoverNotification('Spam Detected..', `Spam detected. Pausing until ${dateString}.`);
                     }
 					updateSetting("spamPauseUntil", untilDate);
 
@@ -217,10 +227,10 @@ async function init_browser() {
 
 			if (!is429) {
 				is429 = true;
-				log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
+				log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error`);
 
                 if (settings.pushover_notifications) {
-                    sendPushoverNotification('429..', `[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error with Retry-After header value: ${response.headers()["retry-after"]}. `);
+                    sendPushoverNotification('429..', `Pausing for 30 minutes due to 429 error.`);
                 }
 
 				updateSetting("last429", new Date().toISOString());
@@ -238,7 +248,7 @@ async function init_browser() {
 		if (status === 401) {
 			log(`[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}, logging in`);
             if (settings.pushover_notifications) {
-                sendPushoverNotification('401..', `[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}, logging in`);
+                sendPushoverNotification('401..', `Received ${status} error for ${response.url()}, logging in`);
             }
 			await login();
 			return;
@@ -247,7 +257,7 @@ async function init_browser() {
 		if (status >= 400 && status < 600) {
 			log(`[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}`);
             if (settings.pushover_notifications) {
-                sendPushoverNotification(`${status}..`, `[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}`);
+                sendPushoverNotification(`${status}..`, `Received ${status} error for ${response.url()}`);
             }
 		}
 
@@ -297,7 +307,7 @@ async function login() {
             await declineCookiesButton.click();
         }
     } catch (err) {
-        console.log("Optional cookies dialog did not appear");
+        // console.log("Optional cookies dialog did not appear");
     }
 
     await page.waitForSelector('input[name="username"]');
@@ -335,7 +345,7 @@ async function commentOnPost() {
     try {
         await page.waitForSelector('textarea[aria-label="Add a comment…"]');
     } catch (error) {
-        console.log("comment selector not found, logging in");
+        // console.log("comment selector not found, logging in");
         await login();
         await page.waitForSelector('textarea[aria-label="Add a comment…"]');
     }
@@ -353,7 +363,7 @@ async function commentOnPost() {
 
 // Socket Handling
 async function handleSocketConnection(socket) {
-    console.log("User connected");
+    // console.log("User connected");
 
     let proxies;
     const lines = await getLast20Lines();

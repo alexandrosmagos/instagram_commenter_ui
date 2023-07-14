@@ -17,8 +17,6 @@
   <p align="center">
     An automated Instagram commenter bot built with Node.js and Puppeteer!
     <br />
-    <a href="https://github.com/alexandrosmagos/instagram_commenter_ui">View Demo</a>
-    ·
     <a href="https://github.com/alexandrosmagos/instagram_commenter_ui/issues">Report Bug</a>
     ·
     <a href="https://github.com/alexandrosmagos/instagram_commenter_ui/issues">Request Feature</a>
@@ -122,6 +120,8 @@ The first page to automatically load up should be the register page. Once regist
 After logging in, fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway. 
 
 After everything is set, press the "Start" button to start the bot. If there are any missing parameters, the bot stops and mentions what is missing. You can also modify various parameters in the UI to your liking.
+
+If you would like to change the theme's image, just change the image in `public/theme.png` image with a transparent image of whatever you want.
 
 ## Roadmap
 
