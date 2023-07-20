@@ -108,8 +108,10 @@ This project requires Node.js and npm. You can install them from the official [N
 3. Install the dependencies
    ```sh
     npm install
+
+4. Rename the `.env example` file to `.env`, and change the `session_secret` string. The app will work without this, but it is recommended to change it for security reasons. You can also enter your instagram credentials here, or from the UI later.
    
-4. Start the application by running `'node server'` in your terminal
+5. Start the application by running `'node server'` in your terminal
 
 ## Usage
 

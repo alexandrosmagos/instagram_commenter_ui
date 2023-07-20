@@ -1,0 +1,8 @@
+IG_USERNAME=''
+IG_PASSWORD=''
+webshare_token=''
+pushoverToken=''
+pushoverUser=''
+
+session_secret='2193n7y!FC$@#$!wqdSsadsa' #Change this to any random string
+PORT=3000

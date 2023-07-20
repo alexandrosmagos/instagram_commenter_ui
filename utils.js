@@ -7,10 +7,17 @@ const proxyModule = require("./proxies.js");
 const fetch = require('node-fetch');
 
 // Initial Configurations and Variables
-let settings = require("./settings/settings.json");
 const settings_location = "./settings/settings.json";
 const cookie_location = "./settings/cookies.json";
 const logs_location = "./settings/logs.txt";
+let settings;
+if (fs.existsSync('./settings/settings.json')) {
+  settings = require('./settings/settings.json');
+} else {
+  init_settings();
+  settings = require('./settings/settings.json');
+}
+
 let browser, page, io;
 let is429 = false, isDelaying = false, errorOccurred = false;
 
@@ -22,8 +29,17 @@ module.exports = function (socketIO) {
 };
 
 async function checkMinSettings() {
-	if (!process.env.IG_USERNAME || !process.env.IG_PASSWORD) {
+    console.log(`Checking minimum settings...`);
+
+	if (!process.env.IG_USERNAME || !process.env.IG_PASSWORD || process.env.IG_USERNAME.length === 0 || process.env.IG_PASSWORD.length === 0) {
 		log("Username or password not set. Go to the settings tab, and enter your login details.");
+		return false;
+	}
+    console.log(`IG_USERNAME.length = ${IG_USERNAME.length}`);
+    console.log(`IG_PASSWORD.length = ${IG_PASSWORD.length}`);
+
+    if (process.env.IG_USERNAME.length < 2 || process.env.IG_PASSWORD.length < 7) {
+		log("Username or password is too short. Go to the settings tab, and enter your login details.");
 		return false;
 	}
 
@@ -55,10 +71,6 @@ async function startBot() {
 	settings.botRunning = true;
 	updateSetting("botRunning", settings.botRunning);
 	log(`Bot has started at ${new Date()}.`);
-
-	// check min settings
-	const minSettings = await checkMinSettings();
-	if (!minSettings) return stopBot();
 
 	const spamPauseUntil = settings.spamPauseUntil || 0;
 	if (Date.now() < spamPauseUntil) {
@@ -378,6 +390,11 @@ async function handleSocketConnection(socket) {
 
     socket.on("start", async () => {
         console.log('Received "start" event');
+
+        // check min settings
+        const minSettings = await checkMinSettings();
+        if (!minSettings) return stopBot();
+        
         const last429 = new Date(settings.last429);
         const timeSinceLast429 = Date.now() - last429.getTime();
 
@@ -568,6 +585,10 @@ function init_settings() {
 		runningOn: "WindowsMac",
 		chromium_headless: "Hidden"
     };
+
+    const dir = path.dirname(settings_location);
+
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     if (!fs.existsSync(settings_location)) {
         fs.writeFileSync(settings_location, JSON.stringify(default_settings, null, 2));
