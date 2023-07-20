@@ -67,10 +67,14 @@ async function checkMinSettings() {
 }
 
 
+let stopPromiseReject;
 async function startBot() {
 	settings.botRunning = true;
 	updateSetting("botRunning", settings.botRunning);
-	log(`Bot has started at ${new Date()}.`);
+
+	// check min settings
+	const minSettings = await checkMinSettings();
+	if (!minSettings) return stopBot();
 
 	const spamPauseUntil = settings.spamPauseUntil || 0;
 	if (Date.now() < spamPauseUntil) {
@@ -82,58 +86,68 @@ async function startBot() {
 		updateSetting("spamPauseUntil", 0);
 	}
 
-	while (settings.botRunning && new Date() < new Date(settings.stopDate)) {
-        if (!settings.botRunning) return;
-        
-        while (isDelaying) {
-            await new Promise((resolve) => setTimeout(resolve, 5000)); // Check every 5 seconds
-        }
+	await Promise.race([
+        new Promise(async (resolve, reject) => {
+            stopPromiseReject = reject;
 
-        try {
-            await page.waitForXPath('//a[contains(@href, "/accounts/login/?next=")]', { timeout: 3000 });
-            const loginCheck = await page.$x('//a[contains(@href, "/accounts/login/?next=")]');
+            while (settings.botRunning && new Date() < new Date(settings.stopDate)) {
+                while (isDelaying) {
+                    await new Promise((resolve) => setTimeout(resolve, 5000)); // Check every 5 seconds
+                }
 
-            // if not logged in, log in
-            if (loginCheck.length > 0) {
-                await login();
-                log(`[${new Date().toLocaleTimeString()}] Navigating to post`);
-                await page.goto(settings.mediaLink, { waitUntil: "networkidle2" });
+                try {
+                    await page.waitForXPath('//a[contains(@href, "/accounts/login/?next=")]', { timeout: 3000 });
+                    const loginCheck = await page.$x('//a[contains(@href, "/accounts/login/?next=")]');
+
+                    // if not logged in, log in
+                    if (loginCheck.length > 0) {
+                        await login();
+                        log(`[${new Date().toLocaleTimeString()}] Navigating to post`);
+                        await page.goto(settings.mediaLink, { waitUntil: "networkidle2" });
+                    }
+                } catch (error) {
+                    // console.log(`[${new Date().toLocaleTimeString()}] User is still logged in`);
+                }
+
+                const delay = getRandomDelay(
+                    convertToMilliseconds(settings.commentMinDelay, settings.commentMinDelayUnits),
+                    convertToMilliseconds(settings.commentMaxDelay, settings.commentMaxDelayUnits)
+                );
+
+                // If enough time has passed since the last comment, comment again
+                if (Date.now() - settings.lastCommented > delay) {
+                    await commentOnPost();
+                    
+                    if (!errorOccurred) {
+                        updateSetting("last429", "");
+                        updateSetting("spamPauseUntil", 0);
+                        incrementCounter();
+                    }
+                }
+
+                // update cookies file with current cookies
+                const cookies = await page.cookies();
+                fs.writeFileSync(cookie_location, JSON.stringify(cookies));
+
+                await new Promise((resolve) => setTimeout(resolve, 5000)); // Check every 5 seconds
             }
-        } catch (error) {
-            // console.log(`[${new Date().toLocaleTimeString()}] User is still logged in`);
-        }
 
-        const delay = getRandomDelay(
-            convertToMilliseconds(settings.commentMinDelay, settings.commentMinDelayUnits),
-            convertToMilliseconds(settings.commentMaxDelay, settings.commentMaxDelayUnits)
-        );
-
-        // If enough time has passed since the last comment, comment again
-        if (Date.now() - settings.lastCommented > delay) {
-            await commentOnPost();
-            
-            if (!errorOccurred) {
-                updateSetting("last429", "");
-                updateSetting("spamPauseUntil", 0);
-                incrementCounter();
-            }
-        }
-
-        // update cookies file with current cookies
-        const cookies = await page.cookies();
-        fs.writeFileSync(cookie_location, JSON.stringify(cookies));
-
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // Check every 5 seconds
-    }
-
-	if (!settings.botRunning) {
-		log(`Bot has been stopped at ${new Date().toLocaleTimeString()}`);
-	}
+            resolve();
+        }),
+        new Promise((resolve, reject) => {})
+    ]).catch(() => {
+        log(`Bot has been stopped at ${new Date().toLocaleTimeString()}`);
+    });
 }
 
 function stopBot() {
 	settings.botRunning = false;
 	updateSetting("botRunning", settings.botRunning);
+
+    if (stopPromiseReject) {
+        stopPromiseReject();
+        stopPromiseReject = null;
+    }
 }
 
 async function init_browser() {
