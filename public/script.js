@@ -2,7 +2,7 @@
 const socket = io();
 const { logsArea, commentsPosted, daysUntilEnd, endDatePicker, minDelay, minDelayUnits, maxDelay, maxDelayUnits, timeSinceError_title, timeSinceError_body, 
 startButton, stopButton, mediaPostLink, clearLogs_btn, saveDataCheckbox, proxyToggle, totalProxies, availableCountries, availableCities, webshare_token_input, 
-pushover_notifications_toggle, pushover_userKey, pushover_appkey, usernamesInput, usernamesPreview, runningOn, chromium_headless, logoutButton } = initializeDOMElements();
+pushover_notifications_toggle, pushover_userKey, pushover_appkey, testNotificationPushover, discord_notifications_toggle, webhookUrl, testNotificationDiscord, usernamesInput, usernamesPreview, runningOn, chromium_headless, logoutButton } = initializeDOMElements();
 
 // Set Event Listeners
 setSocketEvents();
@@ -35,7 +35,10 @@ function initializeDOMElements() {
 		pushover_notifications_toggle: document.getElementById("pushover_notifications_toggle"),
 		pushover_userKey: document.getElementById("pushoverUser"),
 		pushover_appkey: document.getElementById("pushoverToken"),
-		testNotification: document.getElementById("testNotification"),
+		testNotificationPushover: document.getElementById("testNotificationPushover"),
+		discord_notifications_toggle: document.getElementById("discord_notifications_toggle"),
+		webhookUrl: document.getElementById("webhookUrl"),
+		testNotificationDiscord: document.getElementById("testNotificationDiscord"),
 		usernamesPreview: document.getElementById("usernamesPreview"),
 		usernamesInput: document.getElementById("usernames"),
 		amountOfUsersToTag: document.getElementById("amountOfUsersToTag"),
@@ -91,6 +94,28 @@ function setInputEventListeners() {
 
 			if (event.target.type === "checkbox") {
 				value = event.target.checked;
+
+				if (setting === "pushover_notifications") {
+					if (value) {
+						pushover_userKey.disabled = false;
+						pushover_appkey.disabled = false;
+						testNotificationPushover.disabled = false;
+					} else {
+						pushover_userKey.disabled = true;
+						pushover_appkey.disabled = true;
+						testNotificationPushover.disabled = true;
+					}
+				}
+
+				if (setting === "discord_notifications") {
+					if (value) {
+						webhookUrl.disabled = false;
+						testNotificationDiscord.disabled = false;
+					} else {
+						webhookUrl.disabled = true;
+						testNotificationDiscord.disabled = true;
+					}
+				}
 			}
 
 			if (setting === "stopDate") {
@@ -117,8 +142,12 @@ function setInputEventListeners() {
 		setUsernameTags();
 	});
 
-	testNotification.addEventListener("click", () => {
-		socket.emit("testNotification");
+	testNotificationPushover.addEventListener("click", () => {
+		socket.emit("testNotificationPushover");
+	});
+	
+	testNotificationDiscord.addEventListener("click", () => {
+		socket.emit("testNotificationDiscord");
 	});
 }
 
@@ -237,15 +266,28 @@ function updateSettingsTab(msg) {
         pushover_notifications_toggle.checked = true;
         pushover_userKey.disabled = false;
         pushover_appkey.disabled = false;
-        testNotification.disabled = false;
+        testNotificationPushover.disabled = false;
     } else {
         pushover_notifications_toggle.checked = false;
         pushover_userKey.disabled = true;
         pushover_appkey.disabled = true;
-        testNotification.disabled = true;
+        testNotificationPushover.disabled = true;
     }
-    if (msg.env.pushoverToken.length > 0) pushover_appkey.value = msg.env.pushoverToken;
-    if (msg.env.pushoverUser.length > 0) pushover_userKey.value = msg.env.pushoverUser;
+    if (msg.env.pushoverToken && msg.env.pushoverToken.length > 0) pushover_appkey.value = msg.env.pushoverToken;
+    if (msg.env.pushoverUser && msg.env.pushoverUser.length > 0) pushover_userKey.value = msg.env.pushoverUser;
+
+	// update discord settings
+	if (msg.settings.discord_notifications) {
+		discord_notifications_toggle.checked = true;
+		webhookUrl.disabled = false;
+		testNotificationDiscord.disabled = false;
+	} else {
+		discord_notifications_toggle.checked = false;
+		webhookUrl.disabled = true;
+		testNotificationDiscord.disabled = true;
+	}
+	if (msg.env.webhookUrl && msg.env.webhookUrl.length > 0) webhookUrl.value = msg.env.webhookUrl;
+
 
     // update the running settings
     if (msg.settings.chromium_headless.length > 0) chromium_headless.value = msg.settings.chromium_headless;

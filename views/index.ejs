@@ -229,6 +229,7 @@
 
                         <!-- System running on Settings -->
                         <div class="col-md-4 pt-2">
+                            <!-- System Settings Card -->
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">System Settings</h5>
@@ -244,9 +245,39 @@
                                         <option value="Shown">Shown</option>
                                     </select>
                                     <small class="form-text text-muted">Note: If the platform is set to Linux, the browser should be set to Hidden.</small>
+                                </div>
+                            </div>
+                            <hr>
 
-                                    <hr>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Proxies (Not Yet Implemented)</h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" data-setting="proxies_enabled" id="proxyToggle">
+                                        <label class="form-check-label" for="proxyToggle">
+                                            Enable Proxies
+                                        </label>
+                                        <input type="password" class="form-control mt-2" id="webshare_token" data-setting="webshare_token" placeholder="Enter webshare token here">
+                                    </div>
+                                </div>
+                            </div>
 
+                            <hr>
+
+                            <div class="card  text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">Logout of <%= username.charAt(0).toUpperCase() + username.slice(1) %></h5>
+                                    <button id="logoutButton" class="btn btn-primary btn-block">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Proxies Settings -->
+                        <div class="col-md-4 pt-2">
+                            <!-- Notifications Card -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Notifications</h5>
                                     <!-- Pushover Notifications -->
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" data-setting="pushover_notifications" id="pushover_notifications_toggle">
@@ -261,32 +292,25 @@
                                     <label for="pushoverToken">Pushover Application Token</label>
                                     <input type="password" class="form-control" id="pushoverToken" data-setting="pushoverToken" placeholder="Application Token">
                                     <!-- Test Notification Button -->
-                                    <button id="testNotification" class="btn btn-primary mt-2">Send Test Notification</button>
-                                </div>
-                            </div>
-                        </div>
+                                    <button id="testNotificationPushover" class="btn btn-primary mt-2">Send Test Notification</button>
 
-                        <!-- Proxies Settings -->
-                        <div class="col-md-4 pt-2">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Proxies (Not Yet Implemented)</h5>
+                                    <hr>
+
+                                    <!-- Discord Webhook Notifications -->
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" data-setting="proxies_enabled" id="proxyToggle">
-                                        <label class="form-check-label" for="proxyToggle">
-                                            Enable Proxies
+                                        <input class="form-check-input" type="checkbox" value="" data-setting="discord_notifications" id="discord_notifications_toggle">
+                                        <label class="form-check-label" for="discord_notifications_toggle">
+                                            Enable Discord Notifications
                                         </label>
-                                        <input type="password" class="form-control mt-2" id="webshare_token" data-setting="webshare_token" placeholder="Enter webshare token here">
                                     </div>
+                                    <!-- Webhook URL -->
+                                    <label for="webhookUrl">Discord Webhook URL</label>
+                                    <input type="password" class="form-control mb-2" id="webhookUrl" data-setting="webhookUrl" placeholder="Webhook URL">
+                                    <!-- Test Notification Button -->
+                                    <button id="testNotificationDiscord" class="btn btn-primary mt-2">Send Test Notification</button>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Logout of <%= username.charAt(0).toUpperCase() + username.slice(1) %></h5>
-                                    <button id="logoutButton" class="btn btn-primary btn-block">Logout</button>
-                                </div>
-                            </div>
+
                         </div>
 
                     </div>

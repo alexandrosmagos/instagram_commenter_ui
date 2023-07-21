@@ -29,14 +29,10 @@ module.exports = function (socketIO) {
 };
 
 async function checkMinSettings() {
-    console.log(`Checking minimum settings...`);
-
 	if (!process.env.IG_USERNAME || !process.env.IG_PASSWORD || process.env.IG_USERNAME.length === 0 || process.env.IG_PASSWORD.length === 0) {
 		log("Username or password not set. Go to the settings tab, and enter your login details.");
 		return false;
 	}
-    console.log(`IG_USERNAME.length = ${IG_USERNAME.length}`);
-    console.log(`IG_PASSWORD.length = ${IG_PASSWORD.length}`);
 
     if (process.env.IG_USERNAME.length < 2 || process.env.IG_PASSWORD.length < 7) {
 		log("Username or password is too short. Go to the settings tab, and enter your login details.");
@@ -62,6 +58,21 @@ async function checkMinSettings() {
 		log("Media link not set. Go to the main panel tab, and enter the media link.");
 		return false;
 	}
+
+    if (settings.discord_notifications && (!process.env.webhookUrl || process.env.webhookUrl.length === 0)) {
+        log("Discord notifications are enabled, but Webhook URL not set. Go to the settings tab, and enter the Discord Webhook URL.");
+        return false;
+    }
+
+    // if (process.env.webhookUrl && !process.env.webhookUrl.match(/discordapp.com\/api\/webhooks\/([^\/]+)\/([^\/]+)/)) {
+    //     log("Discord Webhook URL is not in the correct format. Go to the settings tab, and enter the Discord Webhook URL.");
+    //     return false;
+    // }
+
+    if (settings.pushover_notifications && (!process.env.pushoverToken || !process.env.pushoverUser || process.env.pushoverToken.length === 0 || process.env.pushoverUser.length === 0)) {
+        log("Pushover notifications are enabled, but Pushover Token or Pushover User not set. Go to the settings tab, and enter the Pushover Token and User.");
+        return false;
+    }
 
 	return true;
 }
@@ -203,9 +214,8 @@ async function init_browser() {
 			is429 = true;
 			errorOccurred = true;
 			log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error `);
-            if (settings.pushover_notifications) {
-                sendPushoverNotification('429..', `Pausing for 30 minutes due to 429 error`);
-            }
+            
+            notify('429..', `Pausing for 30 minutes due to 429 error`);
 
 			updateSetting("last429", new Date().toISOString());
 
@@ -255,9 +265,7 @@ async function init_browser() {
 				is429 = true;
 				log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error`);
 
-                if (settings.pushover_notifications) {
-                    sendPushoverNotification('429..', `Pausing for 30 minutes due to 429 error.`);
-                }
+                notify('429..', `Pausing for 30 minutes due to 429 error.`);
 
 				updateSetting("last429", new Date().toISOString());
 
@@ -273,18 +281,17 @@ async function init_browser() {
 
 		if (status === 401) {
 			log(`[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}, logging in`);
-            if (settings.pushover_notifications) {
-                sendPushoverNotification('401..', `Received ${status} error for ${response.url()}, logging in`);
-            }
+            
+            notify('401..', `Received ${status} error for ${response.url()}, logging in`);
+            
 			await login();
 			return;
 		}
 
 		if (status >= 400 && status < 600) {
 			log(`[${new Date().toLocaleTimeString()}] Received ${status} error for ${response.url()}`);
-            if (settings.pushover_notifications) {
-                sendPushoverNotification(`${status}..`, `Received ${status} error for ${response.url()}`);
-            }
+            notify(`${status}..`, `Received ${status} error for ${response.url()}`);
+
 		}
 
 	});
@@ -396,10 +403,19 @@ async function handleSocketConnection(socket) {
     
     if (settings.proxies_enabled) proxies = await proxyModule.initData();
 
+    const env_data = {
+        IG_USERNAME: process.env.IG_USERNAME || "",
+        IG_PASSWORD: process.env.IG_PASSWORD || "",
+        webshare_token: process.env.webshare_token || "",
+        pushoverToken: process.env.pushoverToken || "",
+        pushoverUser: process.env.pushoverUser || "",
+        webhookUrl: process.env.webhookUrl || ""
+    }
+
     socket.emit("data", { 
         settings: settings, 
         lines: lines, 
-        env: { IG_USERNAME: process.env.IG_USERNAME, IG_PASSWORD: process.env.IG_PASSWORD, webshare_token: process.env.webshare_token, pushoverToken: process.env.pushoverToken, pushoverUser: process.env.pushoverUser }, 
+        env: env_data, 
         proxies });
 
     socket.on("start", async () => {
@@ -430,7 +446,7 @@ async function handleSocketConnection(socket) {
     });
 
     socket.on("changeSetting", ({ setting, value }) => {
-        const envSettings = ["IG_USERNAME", "IG_PASSWORD", "webshare_token", "pushoverUser", "pushoverToken"];
+        const envSettings = ["IG_USERNAME", "IG_PASSWORD", "webshare_token", "pushoverUser", "pushoverToken", "webhookUrl"];
 
         if (envSettings.includes(setting)) {
             return updateEnv(setting, value);
@@ -447,9 +463,14 @@ async function handleSocketConnection(socket) {
         });
     });
 
-    socket.on('testNotification', () => {
-        console.log('Test notification received');
+    socket.on('testNotificationPushover', () => {
+        console.log('Pushover Test notification received');
         sendPushoverNotification('Test Notification', 'This is a test notification');
+    });
+    
+    socket.on('testNotificationDiscord', () => {
+        console.log('Discord Test notification received');
+        sendDiscordNotification('Test Notification', 'This is a test notification');
     });
 }
 
@@ -479,6 +500,51 @@ function getLast20Lines() {
 		}
 	});
 }
+
+function notify(title, message) {
+    if (settings.pushover_notifications) {
+        sendPushoverNotification(title, message);
+    }
+
+    if (settings.discord_notifications) {
+        sendDiscordNotification(title, message);
+    }
+}
+
+function sendDiscordNotification(title, message) {
+    const webhookUrl = process.env.webhookUrl;
+
+    const data = {
+        username: 'Giveaway Bot',
+        avatar_url: 'https://i.imgur.com/n464vlH.png',
+        embeds: [{
+            title: title,
+            description: message,
+            color: 0x2f3136
+        }]
+    };
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    };
+
+    fetch(webhookUrl, requestOptions)
+        .then((response) => {
+            if (response.ok) {
+                console.log('Discord notification sent successfully');
+            } else {
+                log('Failed to send Discord notification');
+            }
+        })
+        .catch((error) => {
+            log('Failed to send Discord notification');
+            console.error('Error sending Discord notification:', error);
+        });
+
+}
+
 
 function sendPushoverNotification(title, message) {
   const pushoverAPIUrl = 'https://api.pushover.net/1/messages.json';
@@ -596,6 +662,7 @@ function init_settings() {
         saveData: true,
         proxies_enabled: false,
         pushover_notifications: false,
+        discord_notifications: false,
 		runningOn: "WindowsMac",
 		chromium_headless: "Hidden"
     };
