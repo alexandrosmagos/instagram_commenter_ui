@@ -213,15 +213,15 @@ async function init_browser() {
 		if (status === 429 && !is429) {
 			is429 = true;
 			errorOccurred = true;
-			log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error `);
+			log(`[${new Date().toLocaleTimeString()}] Pausing for 12 hours due to 429 error `);
             
-            notify('429..', `Pausing for 30 minutes due to 429 error`);
+            notify('429..', `Pausing for 12 hours due to 429 error`);
 
 			updateSetting("last429", new Date().toISOString());
 
 			isDelaying = true;
 
-			await new Promise((resolve) => setTimeout(resolve, 1800000)); //30 min
+			await new Promise((resolve) => setTimeout(resolve, 43200000)); // 12 hours
 
 			isDelaying = false;
 			is429 = false;
@@ -263,15 +263,15 @@ async function init_browser() {
 
 			if (!is429) {
 				is429 = true;
-				log(`[${new Date().toLocaleTimeString()}] Pausing for 30 minutes due to 429 error`);
+				log(`[${new Date().toLocaleTimeString()}] Still got a 429, trying again in 12 hours.`);
 
-                notify('429..', `Pausing for 30 minutes due to 429 error.`);
+                notify('429..', `Still got a 429, trying again in 12 hours.`);
 
 				updateSetting("last429", new Date().toISOString());
 
 				isDelaying = true;
 
-				await new Promise((resolve) => setTimeout(resolve, 1800000)); // 30 min
+				await new Promise((resolve) => setTimeout(resolve, 43200000)); // 12 hours
 
 				isDelaying = false;
 				is429 = false;
