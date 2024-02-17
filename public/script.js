@@ -127,8 +127,9 @@ function setInputEventListeners() {
 			}
 
 			socket.emit("changeSetting", { setting, value });
-			console.log(`Setting ${setting} changed to ${value}`);
-			showToast("Setting Updated", `Setting ${setting} has been set`);
+			const restartSettings = ["IG_USERNAME", "IG_PASSWORD", "webshare_token", "pushoverUser", "pushoverToken", "webhookUrl"];
+			const appendedMessage = (restartSettings.includes(setting) ? ". Please restart the bot for the changes to take effect." : "");
+			showToast("Setting Updated", `Setting ${setting} has been set${appendedMessage}`);
 		});
 	});
 
