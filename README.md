@@ -119,7 +119,9 @@ After starting the application, you can access the user interface from your web 
 
 The first page to automatically load up should be the register page. Once registered, the register page won't show up again.
 
-After logging in, fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway. 
+After logging in, fill in the required fields such as the Instagram username and password, the URL of the post, the delay range for the comments, and the usernames for the tags, for the giveaway.
+
+Note after setting or changing your (instagram, pushover, discord webhook) credentials, a restart is required in order for them to take effect.
 
 After everything is set, press the "Start" button to start the bot. If there are any missing parameters, the bot stops and mentions what is missing. You can also modify various parameters in the UI to your liking.
 
