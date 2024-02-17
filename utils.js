@@ -6,6 +6,8 @@ const readline = require("readline");
 const proxyModule = require("./proxies.js");
 const fetch = require('node-fetch');
 
+const sleep = ms => new Promise(res => setTimeout(res, ms));
+
 // Initial Configurations and Variables
 const settings_location = "./settings/settings.json";
 const cookie_location = "./settings/cookies.json";
@@ -330,10 +332,13 @@ async function init_browser() {
 async function login() {
     log(`[${new Date().toLocaleTimeString()}] User is not logged in. Redirecting to the login page...`);
 
+    //printif page and browser is initialized or not
+    console.log(`Browser initialized: ${browser !== undefined}, page initialized: ${page !== undefined}`);
+
     await page.goto("https://www.instagram.com/accounts/login/");
 
     try {
-        await page.waitForTimeout(2000);
+        await sleep(2000);
         const declineCookiesButton = await page.$('button[tabindex="0"]');
         if (declineCookiesButton) {
             log("Declining optional cookies...")
@@ -347,7 +352,7 @@ async function login() {
     await page.type('input[name="username"]', process.env.IG_USERNAME);
     await page.type('input[name="password"]', process.env.IG_PASSWORD);
 
-    await page.waitForTimeout(500);
+    await sleep(500);
     await page.keyboard.press("Enter");
 
     try {
@@ -385,7 +390,7 @@ async function commentOnPost() {
 
     await page.type('textarea[aria-label="Add a comment…"]', comment, { delay: 60 });
 
-    await page.waitForTimeout(350);
+    await sleep(350);
     await page.keyboard.press("Enter");
 
     log(`[${new Date().toLocaleTimeString()}] Commented '${comment}'`);
@@ -436,7 +441,9 @@ async function handleSocketConnection(socket) {
             await new Promise((resolve) => setTimeout(resolve, remainingTime));
         }
 
+        console.log('Starting bot...');
         await init_browser();
+        console.log('Browser initialized');
         await startBot();
     });
 
