@@ -198,11 +198,6 @@ To contribute:
 4. Push to the Branch (git push origin feature/AmazingFeature)
 5. Open a Pull Request
 
-## Contact
-
-Alexandros Magos - alexandrosmagos@hotmail.com
-
-Project Link: [https://github.com/alexandrosmagos/instagram_commenter_ui](https://github.com/alexandrosmagos/instagram_commenter_ui)
 
 ## License
 
