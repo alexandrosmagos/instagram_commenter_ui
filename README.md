@@ -113,6 +113,12 @@ This project requires Node.js and npm. You can install them from the official [N
    
 5. Start the application by running `'node server'` in your terminal
 
+## How to update
+
+If you want to update the bot, you can simply run the following commands:
+1. `git pull origin main`
+2. `npm install` This is optional, but recommended, as to update the dependencies.
+
 ## Usage
 
 After starting the application, you can access the user interface from your web browser by navigating to one of the links printed on the console, or simply `http://localhost:3000`. 
