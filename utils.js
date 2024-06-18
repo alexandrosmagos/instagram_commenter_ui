@@ -452,6 +452,10 @@ async function handleSocketConnection(socket) {
         stopBot();
     });
 
+    socket.on("resetCounter", () => {
+        resetCounter();
+    });
+
     socket.on("changeSetting", ({ setting, value }) => {
         const envSettings = ["IG_USERNAME", "IG_PASSWORD", "webshare_token", "pushoverUser", "pushoverToken", "webhookUrl"];
 
@@ -516,6 +520,11 @@ function notify(title, message) {
     if (settings.discord_notifications) {
         sendDiscordNotification(title, message);
     }
+}
+
+function resetCounter() {
+    updateSetting('counter', 0);
+    io.emit('counterReset');
 }
 
 function sendDiscordNotification(title, message) {

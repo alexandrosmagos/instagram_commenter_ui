@@ -2,7 +2,7 @@
 const socket = io();
 const { logsArea, commentsPosted, daysUntilEnd, endDatePicker, minDelay, minDelayUnits, maxDelay, maxDelayUnits, timeSinceError_title, timeSinceError_body, 
 startButton, stopButton, mediaPostLink, clearLogs_btn, saveDataCheckbox, proxyToggle, totalProxies, availableCountries, availableCities, webshare_token_input, 
-pushover_notifications_toggle, pushover_userKey, pushover_appkey, testNotificationPushover, discord_notifications_toggle, webhookUrl, testNotificationDiscord, usernamesInput, usernamesPreview, runningOn, chromium_headless, logoutButton } = initializeDOMElements();
+pushover_notifications_toggle, pushover_userKey, pushover_appkey, testNotificationPushover, discord_notifications_toggle, webhookUrl, testNotificationDiscord, usernamesInput, usernamesPreview, runningOn, chromium_headless, logoutButton, resetCounterButton } = initializeDOMElements();
 
 // Set Event Listeners
 setSocketEvents();
@@ -45,6 +45,7 @@ function initializeDOMElements() {
 		runningOn: document.getElementById("runningOn"),
 		chromium_headless: document.getElementById("chromium_headless"),
 		logoutButton: document.getElementById("logoutButton"),
+		resetCounterButton: document.getElementById("resetCounterButton"),
 	};
 }
 
@@ -74,6 +75,11 @@ function setSocketEvents() {
         updateProxiesTab(msg);
         updateSettingsTab(msg);
     });
+
+	socket.on('counterReset', function() {
+		commentsPosted.innerText = "0";
+		showToast('Counter Reset', 'The comments counter has been reset.');
+	});
 
 	
 }
@@ -175,6 +181,10 @@ function setButtonEventListeners() {
             window.location.href = '/';
         })
         .catch(error => console.error('Error:', error));
+	});
+
+	resetCounterButton.addEventListener('click', function () {
+		socket.emit('resetCounter');
 	});
 }
 
